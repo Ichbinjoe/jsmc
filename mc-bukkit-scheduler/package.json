@@ -1,0 +1,17 @@
+{
+  "name": "mc-bukkit-scheduler",
+  "version": "1.0.0",
+  "description": "jsmc bukkit scheduler",
+  "main": "lib/index.js",
+  "author": "Joe Hirschfeld <joe@ibj.io> (Ichbinjoe)",
+  "license": "MIT",
+  "devDependencies": {
+    "babel-cli": "^6.14.0",
+    "babel-preset-es2015": "^6.14.0"
+  },
+  "babel": {
+    "presets": [
+      "es2015"
+    ]
+  }
+}

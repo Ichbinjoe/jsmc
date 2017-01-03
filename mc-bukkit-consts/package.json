@@ -1,0 +1,8 @@
+{
+  "name": "mc-bukkit-consts",
+  "version": "1.0.0",
+  "description": "jsmc bukkit constants",
+  "main": "index.js",
+  "author": "Joe Hirschfeld <joe@ibj.io> (Ichbinjoe)",
+  "license": "MIT"
+}

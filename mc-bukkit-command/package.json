@@ -1,0 +1,24 @@
+{
+  "name": "mc-bukkit-command",
+  "version": "1.0.0",
+  "description": "jsmc bukkit command library",
+  "main": "lib/index.js",
+  "dependencies": {
+    "baconjs": "^0.7.87",
+    "mc-bukkit-plugin" : "^1.0.0"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.0.0",
+    "babel-preset-es2015": "^6.14.0"
+  },
+  "scripts": {
+    "build": "./build.sh"
+  },
+  "author": "Joe Hirschfeld <joe@ibj.io> (Ichbinjoe)",
+  "license": "MIT",
+  "babel": {
+    "presets": [
+      "es2015"
+    ]
+  }
+}

@@ -1,0 +1,4 @@
+rootProject.name = 'jsmc'
+include 'api'
+include 'core'
+include 'bukkit'
