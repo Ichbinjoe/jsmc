@@ -57,37 +57,4 @@ public class JsLoader {
             return parseJson(r);
         }
     }
-
-    public static <Scope> Optional<Dependency> bootstrapModule(DependencyResolver<Scope> resolver, Scope scope) throws Exception {
-        // lets start resolving shit!
-        LogicalModule module = new LogicalModule();
-        // first, lets try and find a package.json we can read
-        Optional<Dependency> packageJson = resolver.resolve(scope, "./package.json");
-        if (packageJson.isPresent()) {
-            try (DependencyLifecycle lifecycle = packageJson.get().depend(module)) {
-                Map packageJsonContents = (Map) lifecycle.getDependencyExports();
-                String main = (String) packageJsonContents.get("main");
-                if (main == null)
-                    throw new RuntimeException("Main js/json file not defined in package.json!");
-                Optional<Dependency> mainDependency = resolver.resolve(scope, "./" + main);
-                if (!mainDependency.isPresent())
-                    throw new RuntimeException("Main js/json '" + main + "' does not exist!");
-                module.setInternalDependency(mainDependency.get());
-                return Optional.of(module);
-            }
-        }
-
-        Optional<Dependency> indexJs = resolver.resolve(scope, "./index.js");
-        if (indexJs.isPresent()) {
-            module.setInternalDependency(indexJs.get());
-            return Optional.of(module);
-        }
-
-        Optional<Dependency> indexJson = resolver.resolve(scope, "./index.json");
-        if (indexJson.isPresent()) {
-            module.setInternalDependency(indexJson.get());
-            return Optional.of(module);
-        }
-        return Optional.empty(); // probably normal directory, not a module.
-    }
 }

@@ -45,7 +45,7 @@ public class FileSystemResolver implements DependencyResolver<File> {
         return cachedDependencies.computeIfAbsent(p, uri -> {
             if (requestedFile.isDirectory()) {
                 try {
-                    return JsLoader.bootstrapModule(this, requestedFile);
+                    return bootstrapDirectory(requestedFile);
                 } catch (Exception e) {
                     throw new RuntimeException("Failed to load module '" + uri.toString() + "'!", e);
                 }
