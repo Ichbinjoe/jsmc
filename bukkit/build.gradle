@@ -22,7 +22,7 @@ repositories {
 
 dependencies {
     compile project(":core")
-    compile group: "org.spigotmc", name: "spigot-api", version: "1.10.2-R0.1-SNAPSHOT"
+    compile group: "org.spigotmc", name: "spigot-api", version: "1.11.2-R0.1-SNAPSHOT"
 }
 
 shadowJar {

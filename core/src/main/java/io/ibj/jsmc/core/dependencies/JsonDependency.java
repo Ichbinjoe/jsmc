@@ -1,6 +1,6 @@
 package io.ibj.jsmc.core.dependencies;
 
-import io.ibj.jsmc.core.SimpleDependencyLifecycle;
+import io.ibj.jsmc.api.SimpleDependencyLifecycle;
 import io.ibj.jsmc.api.Dependency;
 import io.ibj.jsmc.api.DependencyConsumer;
 import io.ibj.jsmc.api.DependencyLifecycle;

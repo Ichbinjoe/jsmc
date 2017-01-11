@@ -1,7 +1,5 @@
 package io.ibj.jsmc.api;
 
-import io.ibj.jsmc.core.SimpleDependencyLifecycle;
-
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;

@@ -1,7 +1,4 @@
-package io.ibj.jsmc.core;
-
-import io.ibj.jsmc.api.Dependency;
-import io.ibj.jsmc.api.DependencyLifecycle;
+package io.ibj.jsmc.api;
 
 /**
  * @author Joseph Hirschfeld (Ichbinjoe) [joe@ibj.io]

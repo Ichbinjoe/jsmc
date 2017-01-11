@@ -5,8 +5,6 @@ apply plugin: 'java'
 
 defaultTasks 'clean', 'build', 'shadow'
 
-sourceCompatibility = 1.8
-
 repositories {
     mavenCentral()
     maven {
@@ -16,4 +14,13 @@ repositories {
 
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.11'
+}
+
+plugins.withType(JavaPlugin) {
+    subprojects.forEach { proj ->
+        proj.tasks.withType(JavaCompile) { task ->
+            task.sourceCompatibility = "1.8"
+            task.targetCompatibility = "1.8"
+        }
+    }
 }
