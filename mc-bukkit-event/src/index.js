@@ -5,7 +5,7 @@ var Class = Java.type("java.lang.Class")
 
 var GenericListener = Java.extend(c.Listener, {})
 
-module.generator = () {
+module.generator = () => {
   var pendingStreams = []
   return {
     close: () => {
