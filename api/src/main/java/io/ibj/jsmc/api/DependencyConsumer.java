@@ -12,6 +12,4 @@ public interface DependencyConsumer {
 
     void reevaluate(Collection<DependencyConsumer> previouslyEvaluatedConsumers);
 
-
-
 }

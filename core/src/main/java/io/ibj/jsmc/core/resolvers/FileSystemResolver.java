@@ -12,6 +12,7 @@ import javax.script.ScriptException;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -24,7 +25,7 @@ import java.util.function.Supplier;
  */
 public class FileSystemResolver implements DependencyResolver<File> {
 
-    private final Map<URI, Optional<Dependency>> cachedDependencies = new HashMap<>();
+    private final Map<Path, Optional<Dependency>> cachedDependencies = new HashMap<>();
     private final Supplier<DependencyResolver<File>> pointDependencyResolver;
 
     public FileSystemResolver(Supplier<DependencyResolver<File>> pointDependencyResolver) {
@@ -40,8 +41,8 @@ public class FileSystemResolver implements DependencyResolver<File> {
             requestScope = requestScope.getParentFile(); // should operate on directories
 
         File requestedFile = new File(requestScope, dependencyIdentifier);
-        URI u = requestedFile.toURI().normalize();
-        return cachedDependencies.computeIfAbsent(u, uri -> {
+        Path p = requestedFile.toPath().toRealPath();
+        return cachedDependencies.computeIfAbsent(p, uri -> {
             if (requestedFile.isDirectory()) {
                 try {
                     return JsLoader.bootstrapModule(this, requestedFile);
@@ -55,9 +56,9 @@ public class FileSystemResolver implements DependencyResolver<File> {
                 return resolve(uri, this::resolveJson);
             else {
                 try {
-                    Optional<Dependency> d = resolve(new URI(uri.toString() + ".js"), this::resolveJs);
+                    Optional<Dependency> d = resolve(pathWithSubstring(requestedFile, ".js"), this::resolveJs);
                     if (d.isPresent()) return d;
-                    return resolve(new URI(uri.toString() + ".json"), this::resolveJson);
+                    return resolve(pathWithSubstring(requestedFile, ".json"), this::resolveJson);
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
@@ -65,12 +66,16 @@ public class FileSystemResolver implements DependencyResolver<File> {
         });
     }
 
-    private Optional<Dependency> resolve(URI uri, Function<URI, Optional<Dependency>> resolutionScheme) {
-        return cachedDependencies.computeIfAbsent(uri, resolutionScheme);
+    private Path pathWithSubstring(File base, String substring) throws IOException {
+        return new File(base.getParentFile(), base.getName() + substring).toPath().toRealPath();
     }
 
-    private Optional<Dependency> resolveJs(URI uri) {
-        File f = new File(uri);
+    private Optional<Dependency> resolve(Path path, Function<Path, Optional<Dependency>> resolutionScheme) {
+        return cachedDependencies.computeIfAbsent(path, resolutionScheme);
+    }
+
+    private Optional<Dependency> resolveJs(Path path) {
+        File f = path.toFile();
         if (!f.exists()) return Optional.empty();
         try {
             return Optional.of(new JsScript<>(JsLoader.load(f), f, new PassthroughResolver<>(this, pointDependencyResolver.get()), f.getName()));
@@ -79,13 +84,13 @@ public class FileSystemResolver implements DependencyResolver<File> {
         }
     }
 
-    private Optional<Dependency> resolveJson(URI uri) {
-        File f = new File(uri);
+    private Optional<Dependency> resolveJson(Path path) {
+        File f = path.toFile();
         if (!f.exists()) return Optional.empty();
         try {
             return Optional.of(new JsonDependency(JsLoader.parseJson(f)));
         } catch (IOException ex) {
-            throw new RuntimeException("Failed to load json zip entry '" + uri + "'!", ex);
+            throw new RuntimeException("Failed to load json zip entry '" + f.getName() + "'!", ex);
         }
     }
 
