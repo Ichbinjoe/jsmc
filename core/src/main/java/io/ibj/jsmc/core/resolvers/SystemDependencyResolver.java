@@ -10,6 +10,9 @@ import java.util.*;
  * @author Joseph Hirschfeld (Ichbinjoe) [joe@ibj.io]
  * @since 9/5/16
  */
+// todo - this needs exposed as an API for plugins to hook into to provide themselves as a dependency.
+// todo - add javadocs
+// todo - expose this in a public way in JsmcPlugin... maybe as a https://hub.spigotmc.org/javadocs/spigot/org/bukkit/plugin/RegisteredServiceProvider.html ?
 public class SystemDependencyResolver<Scope> implements DependencyResolver<Scope> {
 
     private final Map<String, Dependency> systemDependencyMap;
@@ -33,6 +36,7 @@ public class SystemDependencyResolver<Scope> implements DependencyResolver<Scope
     }
 
     public Optional<Dependency> resolve(String dependencyIdentifier) throws Exception {
+        // i am seriously surprised Map.get doesn't have a variant which spits out an optional. like really?!
         return Optional.ofNullable(systemDependencyMap.get(dependencyIdentifier));
     }
 
@@ -49,8 +53,9 @@ public class SystemDependencyResolver<Scope> implements DependencyResolver<Scope
     }
 
     private void set(String label, Dependency object, boolean replace, boolean reload) {
-        if (!replace) {
+        if (!replace) { // todo - inline if
             if (systemDependencyMap.containsKey(label))
+                // todo - typed 'api' exception
                 throw new IllegalStateException("Dependency with label " + label + " already exists.");
         }
 

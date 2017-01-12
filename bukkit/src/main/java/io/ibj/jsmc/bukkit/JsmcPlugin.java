@@ -5,11 +5,14 @@ import io.ibj.jsmc.core.resolvers.FileSystemResolver;
 import io.ibj.jsmc.core.resolvers.ModuleResolver;
 import io.ibj.jsmc.core.resolvers.SystemDependencyResolver;
 import org.bukkit.Bukkit;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
 import java.util.logging.Level;
+
+// todo - configurable default folder. May mean forcing instantiation of resolvers at 'onEnable'
 
 /**
  * @author Joseph Hirschfeld (Ichbinjoe) [joe@ibj.io]
@@ -38,17 +41,24 @@ public class JsmcPlugin extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        for (String module : moduleResolver.getLoadableModules()) {
-            try {
-                dependencyManager.load(module);
-            } catch (Exception e) {
-                System.out.println("Exception occured while enabling module '" + module + "':");
-                e.printStackTrace();
-            }
+        File configFile = new File(getDataFolder(), "config.yml");
+        if (!configFile.exists())
+            saveResource("config.yml", false);
+        FileConfiguration c = new FileConfiguration();
+        c.load(configFile);
+        String loaderModuleName = c.getString("loader");
+        // todo - catch exceptions
+        try {
+            dependencyManager.load(loaderModuleName); // this should then sequentially load everything else
+        } catch (Exception e) {
+            // todo - fail spectacularly. This is very bad if we can't load our module loader
+            System.out.println("Exception occurred while enabling module '" + module + "':");
+            e.printStackTrace();
         }
     }
 
     public static void logExceptionToPlugin(Plugin p, Throwable t) {
+        // todo - more descriptive exceptions
         p.getLogger().log(Level.SEVERE, "An exception occurred!", t);
         t.printStackTrace();
     }

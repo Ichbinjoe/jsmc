@@ -25,6 +25,7 @@ import java.util.function.Supplier;
  */
 public class FileSystemResolver implements DependencyResolver<File> {
 
+    // todo - investigate whether different path forms result in the same hash, or if special handling is required
     private final Map<Path, Optional<Dependency>> cachedDependencies = new HashMap<>();
     private final Supplier<DependencyResolver<File>> pointDependencyResolver;
 
@@ -34,12 +35,14 @@ public class FileSystemResolver implements DependencyResolver<File> {
 
     @Override
     public Optional<Dependency> resolve(File requestScope, final String dependencyIdentifier) throws Exception {
+        // todo - should we even allow absolute paths? not sure if it is windows compatible (pretty sure it isn't)
         if (!(dependencyIdentifier.startsWith("./") || dependencyIdentifier.startsWith("../") || dependencyIdentifier.startsWith("/")))
             return Optional.empty();
 
         if (!requestScope.isDirectory())
             requestScope = requestScope.getParentFile(); // should operate on directories
 
+        // todo - is there a good way to inline this code? feels clunky to go from File->Path->RealPath(Path)
         File requestedFile = new File(requestScope, dependencyIdentifier);
         Path p = requestedFile.toPath().toRealPath();
         return cachedDependencies.computeIfAbsent(p, uri -> {
@@ -47,6 +50,7 @@ public class FileSystemResolver implements DependencyResolver<File> {
                 try {
                     return bootstrapDirectory(requestedFile);
                 } catch (Exception e) {
+                    // todo - throw 'api' exception
                     throw new RuntimeException("Failed to load module '" + uri.toString() + "'!", e);
                 }
             }
@@ -80,6 +84,7 @@ public class FileSystemResolver implements DependencyResolver<File> {
         try {
             return Optional.of(new JsScript<>(JsLoader.load(f), f, new PassthroughResolver<>(this, pointDependencyResolver.get()), f.getName()));
         } catch (IOException | ScriptException e) {
+            // todo - typed 'api' exception
             throw new RuntimeException("Failed to load file '" + f.getAbsolutePath() + "'!", e);
         }
     }
@@ -90,12 +95,12 @@ public class FileSystemResolver implements DependencyResolver<File> {
         try {
             return Optional.of(new JsonDependency(JsLoader.parseJson(f)));
         } catch (IOException ex) {
+            // todo - typed 'api' exception
             throw new RuntimeException("Failed to load json zip entry '" + f.getName() + "'!", ex);
         }
     }
 
     private Optional<Dependency> bootstrapDirectory(File directory) throws Exception {
-        // lets start resolving shit!
         LogicalModule module = new LogicalModule();
         // first, lets try and find a package.json we can read
         Optional<Dependency> packageJson = this.resolve(directory, "./package.json");
@@ -103,10 +108,13 @@ public class FileSystemResolver implements DependencyResolver<File> {
             try (DependencyLifecycle lifecycle = packageJson.get().depend(module)) {
                 Map packageJsonContents = (Map) lifecycle.getDependencyExports();
                 String main = (String) packageJsonContents.get("main");
+                // todo - this isn't required!!! We should defer to index.js then index.json if main isn't defined...!!!
                 if (main == null)
+                    // todo - typed 'api' exception
                     throw new RuntimeException("Main js/json file not defined in package.json!");
                 Optional<Dependency> mainDependency = this.resolve(directory, "./" + main);
                 if (!mainDependency.isPresent())
+                    // todo - typed 'api' exception
                     throw new RuntimeException("Main js/json '" + main + "' does not exist!");
                 module.setInternalDependency(mainDependency.get());
                 return Optional.of(module);

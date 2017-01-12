@@ -74,9 +74,11 @@ public class JsScript<Scope> implements Dependency, DependencyConsumer, Reportab
                         dependencies.add(dependencyLifecycle);
                         return dependencyLifecycle.getDependencyExports();
                     } else {
+                        // todo - typed 'api' exception
                         throw new IllegalArgumentException("No dependent object found by identifier '" + path + "'.");
                     }
                 } catch (Exception e) {
+                    // todo - typed 'api' exception
                     throw new RuntimeException("Error occurred during dependency resolution!", e);
                 }
             });
@@ -85,10 +87,12 @@ public class JsScript<Scope> implements Dependency, DependencyConsumer, Reportab
             internalBindings.put("module", module);
             SimpleScriptContext ctx = new SimpleScriptContext();
             ctx.setBindings(internalBindings, ScriptContext.ENGINE_SCOPE);
+            // todo - figure out why exactly this fails to give exceptions a 'source'..... this is a SHOWSTOPPER for 1.0.0
             ctx.setAttribute(NashornScriptEngine.FILENAME, scope.toString(), ScriptContext.GLOBAL_SCOPE); // todo make real
             try {
                 compiledScript.eval(ctx);
             } catch (Exception e) {
+                // todo - typed 'api' exception
                 report(new RuntimeException("Exception occurred while attempting to evaluate script!", e));
             }
         }
@@ -107,6 +111,7 @@ public class JsScript<Scope> implements Dependency, DependencyConsumer, Reportab
                                 ((ScriptObjectMirror) closeFunction).call(null);
                             }
                         } catch (Throwable t) {
+                            // todo - typed 'api' exception
                             report(new RuntimeException("An exception occurred while closing a dependency lifecycle!", t));
                         }
                         releaseLifecycle(dc);
@@ -129,6 +134,7 @@ public class JsScript<Scope> implements Dependency, DependencyConsumer, Reportab
                     try {
                         ((ScriptObjectMirror) disableFunction).call(module);
                     } catch (Exception e) {
+                        // todo - typed 'api' exception
                         report(new RuntimeException("An exception occurred while disabling the module!", e));
                     }
                 }
@@ -139,6 +145,7 @@ public class JsScript<Scope> implements Dependency, DependencyConsumer, Reportab
             try {
                 dependency.close();
             } catch (Exception e) {
+                // todo - typed 'api' exception
                 report(new RuntimeException("Exception occurred while attempting to close dependency lifecycle!", e));
             }
         }
@@ -176,11 +183,12 @@ public class JsScript<Scope> implements Dependency, DependencyConsumer, Reportab
                     try {
                         ((ScriptObjectMirror) onErrorHandler).call(module, onErrorHandler);
                     } catch (Throwable t2) {
+                        // todo - chain reported exception... dear god joe what were you thinking.
                         logReportedException(t);
                         logReportedException(new RuntimeException("An exception occurred while attempting to handle the above exception!", t2));
                     }
                     return;
-                }
+                } // todo - should probably error instead of silently fail if errorHandler exist but isn't a function...
             }
         }
         logReportedException(t);
@@ -189,9 +197,11 @@ public class JsScript<Scope> implements Dependency, DependencyConsumer, Reportab
     private void logReportedException(Throwable t) {
         Logger l = this.getLogger();
         l.log(Level.SEVERE, "An unhandled exception occurred!");
+        // todo - don't printStackTrace, pass to logger
         t.printStackTrace();
     }
 
+    // todo - allow for scripts to define their own loggers, and cast at runtime
     @Override
     public Logger getLogger() {
         if (internalBindings != null) {

@@ -41,7 +41,8 @@ public class LogicalModule implements Dependency, DependencyConsumer {
         try {
             internalLifecycle.close();
         } catch (Exception e) {
-            throw new RuntimeException("Exception occured while closing internal lifecycle!", e);
+            // todo - typed 'api' exception
+            throw new RuntimeException("Exception occurred while closing internal lifecycle!", e);
         }
         internalLifecycle = null;
     }

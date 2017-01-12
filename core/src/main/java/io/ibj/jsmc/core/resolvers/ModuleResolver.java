@@ -14,8 +14,9 @@ import java.util.regex.Pattern;
  */
 public class ModuleResolver implements DependencyResolver<File> {
 
-    private static final Pattern validModulePattern = Pattern.compile("^((?![\\/\\\\ .]).)*$");
-    private static final Pattern moduleNameExtractionPattern = Pattern.compile("^(((?![\\/\\\\ .]).)*)((\\.js)|(\\.json)|(\\.zip))?$");
+    // a valid module may not have a /, \, space, or . in them
+    private static final Pattern validModulePattern = Pattern.compile("^((?![/\\\\ .]).)*$");
+    private static final Pattern moduleNameExtractionPattern = Pattern.compile("^(((?![/\\\\ .]).)*)((\\.js)|(\\.json))?$");
 
     private final File rootDir;
     private final DependencyResolver<File> fileResolver;
@@ -45,16 +46,24 @@ public class ModuleResolver implements DependencyResolver<File> {
     }
 
     private Optional<Dependency> resolveWithinNodeModules(File currentDirectory, String identifier) throws Exception {
+        // handles terminal case where .getParentFile() results in popping out of root!! (oh noez)
         if (currentDirectory == null) return Optional.empty();
+        // handles when we are in a module directory. we can't search there, so we better pop out again
         if (currentDirectory.getName().endsWith("node_modules"))
             return resolveWithinNodeModules(currentDirectory.getParentFile(), identifier);
+
+        // if a file exists which points to a subdirectory 'node_modules', we should try to extract the module from it
         File nodeModules = new File(currentDirectory, "node_modules");
         if (nodeModules.isDirectory()) {
             Optional<Dependency> nodeModuleOptDep = fileResolver.resolve(nodeModules, "./" + identifier);
             if (nodeModuleOptDep.isPresent()) return nodeModuleOptDep;
         }
+        // Detection of pop out of scope.
+        // todo - is .toURI() the best way to do this? How do we achieve this effectively?
         if (rootDir.toURI().equals(currentDirectory.toURI()))
             return Optional.empty();
+
+        // try parent file system
         return resolveWithinNodeModules(currentDirectory.getParentFile(), identifier);
     }
 
@@ -65,6 +74,7 @@ public class ModuleResolver implements DependencyResolver<File> {
 
         Set<String> ret = new HashSet<>();
 
+        // todo - should this include a list of all modules, or just modules which are capable of being 'loaded'/enabled at call
         for (File f : nodeModuleDir.listFiles()) {
             Matcher matcher = moduleNameExtractionPattern.matcher(f.getName());
             if (!matcher.matches()) continue;

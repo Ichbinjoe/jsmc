@@ -26,7 +26,6 @@ public class DependencyManager<Scope> implements DependencyConsumer {
         this.previouslyLoadedModules = new HashSet<>();
     }
 
-
     @Override
     public Collection<Dependency> getDependencies() {
         return dependencyMap.keySet();
@@ -61,7 +60,7 @@ public class DependencyManager<Scope> implements DependencyConsumer {
                 try {
                     entry.getValue().getLifecyle().close();
                 } catch (Exception e) {
-                    throw new IllegalStateException("Exception occured while trying to unload '" + identifier + "'!", e);
+                    throw new IllegalStateException("Exception occurred while trying to unload '" + identifier + "'!", e);
                 }
                 return;
             }

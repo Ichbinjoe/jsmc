@@ -27,6 +27,9 @@ public class JsLoader {
     private static final Gson GSON = new GsonBuilder().create();
 
     public static CompiledScript load(Reader r) throws ScriptException {
+        // todo - from what I recall, a script filename is set in this method (stupidly...) SHOWSTOPPER
+        // this impacts the source of where the script is from, where we really need to point it at a filename. this is
+        // a critical misdesign if it is - i need to be able to set a custom source!
         return ENGINE.compile(r);
     }
 

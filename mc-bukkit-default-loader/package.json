@@ -1,9 +1,11 @@
 {
-  "name": "mc-bukkit-command",
+  "name": "mc-bukkit-default-loader",
   "version": "1.0.0",
-  "description": "jsmc bukkit command library",
+  "description": "jsmc bukkit default module loader",
   "main": "lib/index.js",
   "dependencies": {
+    "mc-bukkit-command": "^1.0.0",
+    "mc-bukkit-consts": "^1.0.0",
     "mc-bukkit-plugin" : "^1.0.0"
   },
   "devDependencies": {
