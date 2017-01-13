@@ -2,21 +2,17 @@ package io.ibj.jsmc.core;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import io.ibj.jsmc.api.Dependency;
-import io.ibj.jsmc.api.DependencyLifecycle;
-import io.ibj.jsmc.api.DependencyResolver;
-import io.ibj.jsmc.core.dependencies.LogicalModule;
 import jdk.nashorn.api.scripting.NashornScriptEngine;
 import jdk.nashorn.api.scripting.NashornScriptEngineFactory;
 
 import javax.script.CompiledScript;
 import javax.script.ScriptContext;
 import javax.script.ScriptException;
-import java.io.*;
+import java.io.IOException;
+import java.io.Reader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 

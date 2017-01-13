@@ -1,27 +1,24 @@
 package io.ibj.jsmc.core.resolvers;
 
 import com.google.gson.JsonParseException;
-import io.ibj.jsmc.api.exceptions.ModuleCompilationException;
-import io.ibj.jsmc.core.JsLoader;
 import io.ibj.jsmc.api.Dependency;
 import io.ibj.jsmc.api.DependencyLifecycle;
 import io.ibj.jsmc.api.DependencyResolver;
+import io.ibj.jsmc.api.exceptions.ModuleCompilationException;
+import io.ibj.jsmc.core.JsLoader;
 import io.ibj.jsmc.core.dependencies.JsScript;
 import io.ibj.jsmc.core.dependencies.JsonDependency;
 import io.ibj.jsmc.core.dependencies.LogicalModule;
 
 import javax.script.ScriptException;
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.Reader;
-import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
