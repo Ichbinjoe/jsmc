@@ -1,9 +1,8 @@
 package io.ibj.jsmc.api;
 
-import io.ibj.jsmc.api.exceptions.ModuleAlreadyLoadedException;
-import io.ibj.jsmc.api.exceptions.ModuleExecutionException;
-import io.ibj.jsmc.api.exceptions.ModuleNotLoadedException;
+import io.ibj.jsmc.api.exceptions.*;
 
+import java.io.IOException;
 import java.util.Collection;
 
 /**
@@ -48,9 +47,12 @@ public interface DependencyManager {
      * @param moduleIdentifier String representation of a module identifier. Meaning specific to manager
      * @throws IllegalArgumentException     if moduleIdentifier is null or empty
      * @throws ModuleAlreadyLoadedException if moduleIdentifier has previously been loaded
+     * @throws ModuleCompilationException   if module has issues compiling
      * @throws ModuleExecutionException     if module throws an exception
+     * @throws ModuleNotFoundException      if module doesn't actually exist
+     * @throws IOException                  if an io related exception occurs
      */
-    void load(String moduleIdentifier) throws ModuleAlreadyLoadedException, ModuleExecutionException;
+    void load(String moduleIdentifier) throws ModuleAlreadyLoadedException, ModuleCompilationException, ModuleExecutionException, ModuleNotFoundException, IOException;
 
     /**
      * Unloads a module from the dependency manager.
@@ -63,25 +65,9 @@ public interface DependencyManager {
     void unload(Entry moduleEntry) throws ModuleNotLoadedException, ModuleExecutionException;
 
     /**
-     * Unloads all modules from the dependency manager.
-     *
-     * @throws ModuleExecutionException if any of the modules fail to unload without exception. If an exception occurs,
-     *                                  the DependencyManager will still make best effort to continue to unload all
-     *                                  modules. At the end, the exception will be thrown with a concatenation of all
-     *                                  exceptions incurred during unload
-     */
-    void unloadAll() throws ModuleExecutionException;
-
-    /**
      * Returns the internal collection of modules which are currently loaded
      * @return Collection of currently loaded modules
      */
     Collection<Entry> getLoadedModules();
-
-    /**
-     * Returns a collection of strings of modules which is able to be loaded. Does not include already loaded modules
-     * @return Collection of not loaded but loadable modules
-     */
-    Collection<String> getLoadableModules();
 
 }

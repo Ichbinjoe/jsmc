@@ -3,7 +3,10 @@ package io.ibj.jsmc.core.resolvers;
 import io.ibj.jsmc.api.Dependency;
 import io.ibj.jsmc.api.DependencyConsumer;
 import io.ibj.jsmc.api.DependencyResolver;
+import io.ibj.jsmc.api.exceptions.ModuleAlreadyLoadedException;
 import io.ibj.jsmc.api.exceptions.ModuleCompilationException;
+import io.ibj.jsmc.api.exceptions.ModuleExecutionException;
+import io.ibj.jsmc.api.exceptions.ModuleNotFoundException;
 
 import java.io.IOException;
 import java.util.*;
@@ -63,7 +66,11 @@ public class SystemDependencyResolver<Scope> implements DependencyResolver<Scope
         if (previousDependency != null && reload) {
             Collection<DependencyConsumer> reevalSession = new HashSet<>();
             for (DependencyConsumer consumer : previousDependency.getDependents())
-                consumer.reevaluate(reevalSession);
+                try {
+                    consumer.reevaluate(reevalSession);
+                } catch (ModuleExecutionException | IOException | ModuleAlreadyLoadedException | ModuleCompilationException | ModuleNotFoundException e) {
+                    // todo - throw api exception
+                }
         }
     }
 

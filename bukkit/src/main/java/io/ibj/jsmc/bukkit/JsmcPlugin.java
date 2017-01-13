@@ -1,6 +1,6 @@
 package io.ibj.jsmc.bukkit;
 
-import io.ibj.jsmc.core.DependencyManager;
+import io.ibj.jsmc.core.BasicDependencyManager;
 import io.ibj.jsmc.core.resolvers.FileSystemResolver;
 import io.ibj.jsmc.core.resolvers.ModuleResolver;
 import io.ibj.jsmc.core.resolvers.SystemDependencyResolver;
@@ -27,7 +27,7 @@ public class JsmcPlugin extends JavaPlugin {
     private final SystemDependencyResolver<Path> systemDependencyResolver;
     private final SystemDependencyResolver<Path> addOnDependencyResolver;
     private ModuleResolver moduleResolver = null;
-    private final DependencyManager<Path> dependencyManager;
+    private final BasicDependencyManager<Path> dependencyManager;
 
     public JsmcPlugin() {
         Path rootPath = Bukkit.getWorldContainer().toPath();
@@ -35,7 +35,7 @@ public class JsmcPlugin extends JavaPlugin {
         systemDependencyResolver = new SystemDependencyResolver<>(null);
         addOnDependencyResolver = new SystemDependencyResolver<>(systemDependencyResolver);
         moduleResolver = new ModuleResolver(rootPath, fileSystemResolver, addOnDependencyResolver);
-        dependencyManager = new DependencyManager<>(moduleResolver, rootPath);
+        dependencyManager = new BasicDependencyManager<>(moduleResolver, rootPath);
     }
 
     @Override

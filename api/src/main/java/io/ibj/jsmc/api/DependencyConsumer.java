@@ -1,5 +1,11 @@
 package io.ibj.jsmc.api;
 
+import io.ibj.jsmc.api.exceptions.ModuleAlreadyLoadedException;
+import io.ibj.jsmc.api.exceptions.ModuleCompilationException;
+import io.ibj.jsmc.api.exceptions.ModuleExecutionException;
+import io.ibj.jsmc.api.exceptions.ModuleNotFoundException;
+
+import java.io.IOException;
 import java.util.Collection;
 
 // todo - tests
@@ -29,6 +35,6 @@ public interface DependencyConsumer {
      * @param previouslyEvaluatedConsumers Collection of consumers which have already been evaluated, and should not be
      *                                     reevaluated
      */
-    void reevaluate(Collection<DependencyConsumer> previouslyEvaluatedConsumers);
+    void reevaluate(Collection<DependencyConsumer> previouslyEvaluatedConsumers) throws ModuleExecutionException, IOException, ModuleCompilationException, ModuleAlreadyLoadedException, ModuleNotFoundException;
 
 }
