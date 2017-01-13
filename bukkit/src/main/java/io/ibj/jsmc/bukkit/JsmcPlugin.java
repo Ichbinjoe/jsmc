@@ -30,11 +30,12 @@ public class JsmcPlugin extends JavaPlugin {
     private final DependencyManager<Path> dependencyManager;
 
     public JsmcPlugin() {
-        fileSystemResolver = new FileSystemResolver(() -> moduleResolver);
+        Path rootPath = Bukkit.getWorldContainer().toPath();
+        fileSystemResolver = new FileSystemResolver(() -> moduleResolver, rootPath);
         systemDependencyResolver = new SystemDependencyResolver<>(null);
         addOnDependencyResolver = new SystemDependencyResolver<>(systemDependencyResolver);
-        moduleResolver = new ModuleResolver(Bukkit.getWorldContainer().toPath(), fileSystemResolver, addOnDependencyResolver);
-        dependencyManager = new DependencyManager<>(moduleResolver, Bukkit.getWorldContainer().toPath());
+        moduleResolver = new ModuleResolver(rootPath, fileSystemResolver, addOnDependencyResolver);
+        dependencyManager = new DependencyManager<>(moduleResolver, rootPath);
     }
 
     @Override

@@ -10,12 +10,15 @@ import jdk.nashorn.api.scripting.NashornScriptEngine;
 import jdk.nashorn.api.scripting.NashornScriptEngineFactory;
 
 import javax.script.CompiledScript;
+import javax.script.ScriptContext;
 import javax.script.ScriptException;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * It loads javascript. Don't question it's power.
@@ -26,35 +29,22 @@ import java.util.Optional;
 public class JsLoader {
 
     private static final NashornScriptEngine ENGINE = (NashornScriptEngine) new NashornScriptEngineFactory().getScriptEngine();
+    private static final Lock ENGINE_LOCK = new ReentrantLock();
+
     private static final Gson GSON = new GsonBuilder().create();
 
-    public static CompiledScript load(Reader r) throws ScriptException {
-        // todo - from what I recall, a script filename is set in this method (stupidly...) SHOWSTOPPER
-        // this impacts the source of where the script is from, where we really need to point it at a filename. this is
-        // a critical misdesign if it is - i need to be able to set a custom source!
-        return ENGINE.compile(r);
-    }
-
-    public static CompiledScript load(Path p) throws IOException, ScriptException {
-        try (Reader r = Files.newBufferedReader(p)) {
-            return load(r);
-        }
-    }
-
-    public static CompiledScript load(InputStream s) throws ScriptException, IOException {
-        try (Reader r = new InputStreamReader(s)) {
-            return load(r);
+    public static CompiledScript load(Reader r, String source) throws ScriptException {
+        ENGINE_LOCK.lock();
+        try {
+            ENGINE.getContext().setAttribute(NashornScriptEngine.FILENAME, source, ScriptContext.ENGINE_SCOPE);
+            return ENGINE.compile(r);
+        } finally {
+            ENGINE_LOCK.unlock();
         }
     }
 
     public static Object parseJson(Reader r) {
         return GSON.fromJson(r, Map.class);
-    }
-
-    public static Object parseJson(InputStream s) throws IOException {
-        try (Reader r = new InputStreamReader(s)) {
-            return parseJson(r);
-        }
     }
 
     public static Object parseJson(Path p) throws IOException {

@@ -14,6 +14,7 @@ import javax.script.ScriptException;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.Reader;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -35,9 +36,11 @@ public class FileSystemResolver implements DependencyResolver<Path> {
 
     private final Map<Path, Optional<Dependency>> cachedDependencies = new HashMap<>();
     private final Supplier<DependencyResolver<Path>> pointDependencyResolver;
+    private final Path rootPath;
 
-    public FileSystemResolver(Supplier<DependencyResolver<Path>> pointDependencyResolver) {
+    public FileSystemResolver(Supplier<DependencyResolver<Path>> pointDependencyResolver, Path rootPath) {
         this.pointDependencyResolver = pointDependencyResolver;
+        this.rootPath = rootPath;
     }
 
     @Override
@@ -78,9 +81,9 @@ public class FileSystemResolver implements DependencyResolver<Path> {
 
     private Optional<Dependency> resolveJs(Path path) throws ModuleCompilationException, IOException {
         if (!Files.exists(path)) return Optional.empty();
-        try {
+        try (Reader r = Files.newBufferedReader(path)){
             return Optional.of(new JsScript<>(
-                    JsLoader.load(path),
+                    JsLoader.load(r, path.relativize(rootPath).toString()),
                     path,
                     new PassthroughResolver<>(this, pointDependencyResolver.get()),
                     path.getFileName().toString()));
