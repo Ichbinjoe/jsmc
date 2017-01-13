@@ -24,3 +24,16 @@ plugins.withType(JavaPlugin) {
         }
     }
 }
+
+subprojects.forEach { proj ->
+    proj.apply plugin: 'java'
+    proj.test {
+        afterTest { descriptor, result ->
+            if (result.resultType == TestResult.ResultType.SUCCESS)
+                logger.info("Test '" + descriptor + "' passed")
+            else if (result.resultType == TestResult.ResultType.FAILURE)
+                logger.log(LogLevel.ERROR, "Test $descriptor completed in error!");
+        }
+    }
+}
+
