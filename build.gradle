@@ -1,7 +1,7 @@
 group 'io.ibj'
 version '1.0-SNAPSHOT'
 
-defaultTasks 'clean', 'build', 'shadow'
+defaultTasks 'clean', 'build', 'shadow', 'test'
 
 subprojects.forEach { p ->
     p.apply plugin: 'java'

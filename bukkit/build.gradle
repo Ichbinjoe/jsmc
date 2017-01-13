@@ -8,5 +8,9 @@ dependencies {
 }
 
 shadowJar {
-    configurations = [project.configurations.compile]
+    dependencies {
+        include(dependency {
+            return it.moduleGroup == "jsmc"
+        })
+    }
 }
