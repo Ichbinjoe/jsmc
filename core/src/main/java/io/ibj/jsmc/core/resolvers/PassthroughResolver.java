@@ -2,7 +2,9 @@ package io.ibj.jsmc.core.resolvers;
 
 import io.ibj.jsmc.api.Dependency;
 import io.ibj.jsmc.api.DependencyResolver;
+import io.ibj.jsmc.api.exceptions.ModuleCompilationException;
 
+import java.io.IOException;
 import java.util.Optional;
 
 /**
@@ -20,7 +22,7 @@ public class PassthroughResolver<Scope> implements DependencyResolver<Scope> {
     }
 
     @Override
-    public Optional<Dependency> resolve(Scope requestScope, String dependencyIdentifier) throws Exception {
+    public Optional<Dependency> resolve(Scope requestScope, String dependencyIdentifier) throws ModuleCompilationException, IOException {
         Optional<Dependency> ret = fileSystemResolver.resolve(requestScope, dependencyIdentifier);
         if (!ret.isPresent())
             return downstreamResolver.resolve(requestScope, dependencyIdentifier);

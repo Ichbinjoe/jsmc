@@ -2,85 +2,82 @@ package io.ibj.jsmc.core.resolvers;
 
 import io.ibj.jsmc.api.Dependency;
 import io.ibj.jsmc.api.DependencyResolver;
+import io.ibj.jsmc.api.exceptions.ModuleCompilationException;
 
-import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.*;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
  * @author Joseph Hirschfeld (Ichbinjoe) [joe@ibj.io]
  * @since 9/9/16
  */
-public class ModuleResolver implements DependencyResolver<File> {
+public class ModuleResolver implements DependencyResolver<Path> {
 
     // a valid module may not have a /, \, space, or . in them
     private static final Pattern validModulePattern = Pattern.compile("^((?![/\\\\ .]).)*$");
     private static final Pattern moduleNameExtractionPattern = Pattern.compile("^(((?![/\\\\ .]).)*)((\\.js)|(\\.json))?$");
 
-    private final File rootDir;
-    private final DependencyResolver<File> fileResolver;
-    private final DependencyResolver<File> downstreamResolver;
+    private final Path rootPath;
+    private final DependencyResolver<Path> fileResolver;
+    private final DependencyResolver<Path> downstreamResolver;
 
-    public ModuleResolver(File rootDir, DependencyResolver<File> fileResolver, DependencyResolver<File> downstreamResolver) {
-        this.rootDir = rootDir;
+    public ModuleResolver(Path rootPath, DependencyResolver<Path> fileResolver, DependencyResolver<Path> downstreamResolver) {
+        this.rootPath = rootPath;
         this.fileResolver = fileResolver;
         this.downstreamResolver = downstreamResolver;
     }
 
     @Override
-    public Optional<Dependency> resolve(File requestScope, String dependencyIdentifier) throws Exception {
+    public Optional<Dependency> resolve(Path requestScope, String dependencyIdentifier) throws ModuleCompilationException, IOException {
         Optional<Dependency> d = Optional.empty();
 
         if (validModulePattern.matcher(dependencyIdentifier).matches()) {
-            File f;
-            if (requestScope.isDirectory())
-                f = requestScope;
+            Path nodeModuleResolutionPath;
+            if (Files.isDirectory(requestScope))
+                nodeModuleResolutionPath = requestScope;
             else
-                f = requestScope.getParentFile();
-            d = resolveWithinNodeModules(f, dependencyIdentifier);
+                nodeModuleResolutionPath = requestScope.getParent();
+            d = resolveWithinNodeModules(nodeModuleResolutionPath, dependencyIdentifier);
         }
         if (!d.isPresent() && downstreamResolver != null)
             return downstreamResolver.resolve(requestScope, dependencyIdentifier);
         return d;
     }
 
-    private Optional<Dependency> resolveWithinNodeModules(File currentDirectory, String identifier) throws Exception {
+    private Optional<Dependency> resolveWithinNodeModules(Path currentDirectory, String identifier) throws ModuleCompilationException, IOException {
         // handles terminal case where .getParentFile() results in popping out of root!! (oh noez)
         if (currentDirectory == null) return Optional.empty();
         // handles when we are in a module directory. we can't search there, so we better pop out again
-        if (currentDirectory.getName().endsWith("node_modules"))
-            return resolveWithinNodeModules(currentDirectory.getParentFile(), identifier);
+        while (currentDirectory.getFileName().endsWith("node_modules"))
+            currentDirectory = currentDirectory.getParent();
 
         // if a file exists which points to a subdirectory 'node_modules', we should try to extract the module from it
-        File nodeModules = new File(currentDirectory, "node_modules");
-        if (nodeModules.isDirectory()) {
+        Path nodeModules = currentDirectory.resolve("node_modules");
+        if (Files.isDirectory(nodeModules)) {
             Optional<Dependency> nodeModuleOptDep = fileResolver.resolve(nodeModules, "./" + identifier);
             if (nodeModuleOptDep.isPresent()) return nodeModuleOptDep;
         }
         // Detection of pop out of scope.
-        // todo - is .toURI() the best way to do this? How do we achieve this effectively?
-        if (rootDir.toURI().equals(currentDirectory.toURI()))
+        if (Files.isSameFile(currentDirectory, rootPath))
             return Optional.empty();
 
         // try parent file system
-        return resolveWithinNodeModules(currentDirectory.getParentFile(), identifier);
+        return resolveWithinNodeModules(currentDirectory.getParent(), identifier);
     }
 
-    public Collection<String> getLoadableModules() {
-        File nodeModuleDir = new File(rootDir, "node_modules");
-        if (!nodeModuleDir.isDirectory())
+    public Collection<String> getLoadableModules() throws IOException {
+        Path nodeModules = rootPath.resolve("node_modules");
+        if (!Files.isDirectory(nodeModules))
             return Collections.EMPTY_SET;
 
         Set<String> ret = new HashSet<>();
 
-        // todo - should this include a list of all modules, or just modules which are capable of being 'loaded'/enabled at call
-        for (File f : nodeModuleDir.listFiles()) {
-            Matcher matcher = moduleNameExtractionPattern.matcher(f.getName());
-            if (!matcher.matches()) continue;
-            ret.add(matcher.group(1));
-        }
-
+        Files.newDirectoryStream(nodeModules, path ->
+                moduleNameExtractionPattern.matcher(path.getFileName().toString()).matches()
+        ).forEach(p -> ret.add(p.getFileName().toString()));
         return ret;
     }
 }

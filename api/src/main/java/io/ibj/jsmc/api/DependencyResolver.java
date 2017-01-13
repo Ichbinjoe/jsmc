@@ -2,6 +2,7 @@ package io.ibj.jsmc.api;
 
 import io.ibj.jsmc.api.exceptions.ModuleCompilationException;
 
+import java.io.IOException;
 import java.util.Optional;
 
 // todo - tests
@@ -22,7 +23,8 @@ public interface DependencyResolver<Scope> {
      * @param dependencyIdentifier identifier of the dependency which needs resolved
      * @return Optional of the resolved dependency. Will be empty if the dependency was not found
      * @throws ModuleCompilationException if the module fails to be loaded / compiled correctly
+     * @throws IOException in the event of an IO based exception
      */
-    Optional<Dependency> resolve(Scope requestScope, String dependencyIdentifier) throws ModuleCompilationException;
+    Optional<Dependency> resolve(Scope requestScope, String dependencyIdentifier) throws ModuleCompilationException, IOException;
 
 }

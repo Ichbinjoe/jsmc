@@ -5,11 +5,12 @@ import io.ibj.jsmc.core.resolvers.FileSystemResolver;
 import io.ibj.jsmc.core.resolvers.ModuleResolver;
 import io.ibj.jsmc.core.resolvers.SystemDependencyResolver;
 import org.bukkit.Bukkit;
-import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
+import java.nio.file.Path;
 import java.util.logging.Level;
 
 // todo - configurable default folder. May mean forcing instantiation of resolvers at 'onEnable'
@@ -20,46 +21,78 @@ import java.util.logging.Level;
  */
 public class JsmcPlugin extends JavaPlugin {
 
+    private static final String ERROR_HEADER = "=============================================\n";
+
     private final FileSystemResolver fileSystemResolver;
-    private final SystemDependencyResolver<File> systemDependencyResolver;
-    private final SystemDependencyResolver<File> addOnDependencyResolver;
+    private final SystemDependencyResolver<Path> systemDependencyResolver;
+    private final SystemDependencyResolver<Path> addOnDependencyResolver;
     private ModuleResolver moduleResolver = null;
-    private final DependencyManager<File> dependencyManager;
+    private final DependencyManager<Path> dependencyManager;
 
     public JsmcPlugin() {
         fileSystemResolver = new FileSystemResolver(() -> moduleResolver);
         systemDependencyResolver = new SystemDependencyResolver<>(null);
         addOnDependencyResolver = new SystemDependencyResolver<>(systemDependencyResolver);
-        moduleResolver = new ModuleResolver(Bukkit.getWorldContainer(), fileSystemResolver, addOnDependencyResolver);
-        dependencyManager = new DependencyManager<>(moduleResolver, Bukkit.getWorldContainer());
+        moduleResolver = new ModuleResolver(Bukkit.getWorldContainer().toPath(), fileSystemResolver, addOnDependencyResolver);
+        dependencyManager = new DependencyManager<>(moduleResolver, Bukkit.getWorldContainer().toPath());
     }
 
     @Override
     public void onDisable() {
-        dependencyManager.unloadAll();
+        try {
+            dependencyManager.unloadAll();
+        } catch (Exception e) {
+            String msg = "" +
+                    ERROR_HEADER +
+                    "A severe exception has occurred! jsmc may not have shut down correctly.\n" +
+                    "jsmc was unable to unload all of it's dependencies safely. This is usually\n" +
+                    "not jsmc's fault, but instead a module on the system unable to shut down\n" +
+                    "cleanly.\n" +
+                    ERROR_HEADER;
+            getLogger().log(Level.SEVERE, msg, e);
+        }
     }
 
     @Override
     public void onEnable() {
-        File configFile = new File(getDataFolder(), "config.yml");
-        if (!configFile.exists())
-            saveResource("config.yml", false);
-        FileConfiguration c = new FileConfiguration();
-        c.load(configFile);
+        YamlConfiguration c;
+        try {
+            File configFile = new File(getDataFolder(), "config.yml");
+            if (!configFile.exists())
+                saveResource("config.yml", false);
+            c = YamlConfiguration.loadConfiguration(configFile);
+        } catch (Exception e) {
+            String msg = "" +
+                    ERROR_HEADER +
+                    "A severe exception has occurred! jsmc will not be able to load!\n" +
+                    "jsmc was unable to read off/save a new config.yml in the jsmc\n" +
+                    "plugin folder. This is usually due to file permissions or a\n" +
+                    "malformed yaml.\n" +
+                    "jsmc will now disable!\n" +
+                    ERROR_HEADER;
+            getLogger().log(Level.SEVERE, msg, e);
+            setEnabled(false);
+            return;
+        }
+
         String loaderModuleName = c.getString("loader");
-        // todo - catch exceptions
+        if (loaderModuleName == null) {
+            getLogger().info("loader null in config.yml, using mc-bukkit-default-loader...");
+            loaderModuleName = "mc-bukkit-default-loader";
+        }
+
         try {
             dependencyManager.load(loaderModuleName); // this should then sequentially load everything else
         } catch (Exception e) {
-            // todo - fail spectacularly. This is very bad if we can't load our module loader
-            System.out.println("Exception occurred while enabling module '" + module + "':");
-            e.printStackTrace();
+            String msg = "" +
+                    ERROR_HEADER +
+                    "A severe exception has occurred! jsmc will not be able to load!\n" +
+                    "jsmc was unable to start the dependency management module:\n" + loaderModuleName + "\n" +
+                    "jsmc will now disable!\n" +
+                    ERROR_HEADER;
+            getLogger().log(Level.SEVERE, msg, e);
+            setEnabled(false);
+            return;
         }
-    }
-
-    public static void logExceptionToPlugin(Plugin p, Throwable t) {
-        // todo - more descriptive exceptions
-        p.getLogger().log(Level.SEVERE, "An exception occurred!", t);
-        t.printStackTrace();
     }
 }

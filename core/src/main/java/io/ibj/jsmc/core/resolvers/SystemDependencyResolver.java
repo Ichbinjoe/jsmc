@@ -3,7 +3,9 @@ package io.ibj.jsmc.core.resolvers;
 import io.ibj.jsmc.api.Dependency;
 import io.ibj.jsmc.api.DependencyConsumer;
 import io.ibj.jsmc.api.DependencyResolver;
+import io.ibj.jsmc.api.exceptions.ModuleCompilationException;
 
+import java.io.IOException;
 import java.util.*;
 
 /**
@@ -24,7 +26,7 @@ public class SystemDependencyResolver<Scope> implements DependencyResolver<Scope
     }
 
     @Override
-    public Optional<Dependency> resolve(Scope requestScope, String dependencyIdentifier) throws Exception {
+    public Optional<Dependency> resolve(Scope requestScope, String dependencyIdentifier) throws ModuleCompilationException, IOException {
         Optional<Dependency> foundDependency = resolve(dependencyIdentifier);
         if (!foundDependency.isPresent())
             if (parentDependencyResolver != null)
@@ -35,7 +37,7 @@ public class SystemDependencyResolver<Scope> implements DependencyResolver<Scope
             return foundDependency;
     }
 
-    public Optional<Dependency> resolve(String dependencyIdentifier) throws Exception {
+    public Optional<Dependency> resolve(String dependencyIdentifier) throws ModuleCompilationException, IOException {
         // i am seriously surprised Map.get doesn't have a variant which spits out an optional. like really?!
         return Optional.ofNullable(systemDependencyMap.get(dependencyIdentifier));
     }
@@ -53,11 +55,9 @@ public class SystemDependencyResolver<Scope> implements DependencyResolver<Scope
     }
 
     private void set(String label, Dependency object, boolean replace, boolean reload) {
-        if (!replace) { // todo - inline if
-            if (systemDependencyMap.containsKey(label))
-                // todo - typed 'api' exception
-                throw new IllegalStateException("Dependency with label " + label + " already exists.");
-        }
+        if (!replace && systemDependencyMap.containsKey(label))
+            // todo - typed 'api' exception
+            throw new IllegalStateException("Dependency with label " + label + " already exists.");
 
         Dependency previousDependency = systemDependencyMap.put(label, object);
         if (previousDependency != null && reload) {

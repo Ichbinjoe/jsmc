@@ -1,5 +1,7 @@
 package io.ibj.jsmc.core.resolvers;
 
+import com.google.gson.JsonParseException;
+import io.ibj.jsmc.api.exceptions.ModuleCompilationException;
 import io.ibj.jsmc.core.JsLoader;
 import io.ibj.jsmc.api.Dependency;
 import io.ibj.jsmc.api.DependencyLifecycle;
@@ -10,8 +12,10 @@ import io.ibj.jsmc.core.dependencies.LogicalModule;
 
 import javax.script.ScriptException;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URI;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
@@ -23,84 +27,82 @@ import java.util.function.Supplier;
  * @author Joseph Hirschfeld (Ichbinjoe) [joe@ibj.io]
  * @since 9/5/16
  */
-public class FileSystemResolver implements DependencyResolver<File> {
+public class FileSystemResolver implements DependencyResolver<Path> {
 
-    // todo - investigate whether different path forms result in the same hash, or if special handling is required
+    private interface Resolver {
+        Optional<Dependency> apply(Path p) throws ModuleCompilationException, IOException;
+    }
+
     private final Map<Path, Optional<Dependency>> cachedDependencies = new HashMap<>();
-    private final Supplier<DependencyResolver<File>> pointDependencyResolver;
+    private final Supplier<DependencyResolver<Path>> pointDependencyResolver;
 
-    public FileSystemResolver(Supplier<DependencyResolver<File>> pointDependencyResolver) {
+    public FileSystemResolver(Supplier<DependencyResolver<Path>> pointDependencyResolver) {
         this.pointDependencyResolver = pointDependencyResolver;
     }
 
     @Override
-    public Optional<Dependency> resolve(File requestScope, final String dependencyIdentifier) throws Exception {
+    public Optional<Dependency> resolve(Path requestScope, final String dependencyIdentifier) throws ModuleCompilationException, IOException {
         // todo - should we even allow absolute paths? not sure if it is windows compatible (pretty sure it isn't)
+        if (Files.notExists(requestScope)) throw new IllegalArgumentException("Request scope must exist");
         if (!(dependencyIdentifier.startsWith("./") || dependencyIdentifier.startsWith("../") || dependencyIdentifier.startsWith("/")))
             return Optional.empty();
 
-        if (!requestScope.isDirectory())
-            requestScope = requestScope.getParentFile(); // should operate on directories
+        if (!Files.isDirectory(requestScope))
+            requestScope = requestScope.getParent(); // we want to instead operate on directories
 
-        // todo - is there a good way to inline this code? feels clunky to go from File->Path->RealPath(Path)
-        File requestedFile = new File(requestScope, dependencyIdentifier);
-        Path p = requestedFile.toPath().toRealPath();
-        return cachedDependencies.computeIfAbsent(p, uri -> {
-            if (requestedFile.isDirectory()) {
-                try {
-                    return bootstrapDirectory(requestedFile);
-                } catch (Exception e) {
-                    // todo - throw 'api' exception
-                    throw new RuntimeException("Failed to load module '" + uri.toString() + "'!", e);
-                }
-            }
-            if (dependencyIdentifier.endsWith(".js"))
-                return resolve(uri, this::resolveJs);
+        Path requestPath = requestScope.resolve(dependencyIdentifier);
+        return resolve(requestPath, p -> {
+            if (Files.isDirectory(p))
+                return bootstrapDirectory(p);
+            else if (dependencyIdentifier.endsWith(".js"))
+                return resolve(p, this::resolveJs);
             else if (dependencyIdentifier.endsWith(".json"))
-                return resolve(uri, this::resolveJson);
+                return resolve(p, this::resolveJson);
             else {
-                try {
-                    Optional<Dependency> d = resolve(pathWithSubstring(requestedFile, ".js"), this::resolveJs);
-                    if (d.isPresent()) return d;
-                    return resolve(pathWithSubstring(requestedFile, ".json"), this::resolveJson);
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
+                Optional<Dependency> d = resolve(p.resolveSibling(p.getFileName() + ".js"), this::resolveJs);
+                if (!d.isPresent())
+                    return resolve(p.resolveSibling(p.getFileName() + ".json"), this::resolveJson);
+                return d;
             }
         });
     }
 
-    private Path pathWithSubstring(File base, String substring) throws IOException {
-        return new File(base.getParentFile(), base.getName() + substring).toPath().toRealPath();
+    private Optional<Dependency> resolve(Path path, Resolver resolutionScheme) throws ModuleCompilationException, IOException {
+        Optional<Dependency> dependency = cachedDependencies.get(path);
+        if (dependency == null) {
+            dependency = resolutionScheme.apply(path);
+            cachedDependencies.put(path, dependency);
+        }
+        return dependency;
     }
 
-    private Optional<Dependency> resolve(Path path, Function<Path, Optional<Dependency>> resolutionScheme) {
-        return cachedDependencies.computeIfAbsent(path, resolutionScheme);
-    }
-
-    private Optional<Dependency> resolveJs(Path path) {
-        File f = path.toFile();
-        if (!f.exists()) return Optional.empty();
+    private Optional<Dependency> resolveJs(Path path) throws ModuleCompilationException, IOException {
+        if (!Files.exists(path)) return Optional.empty();
         try {
-            return Optional.of(new JsScript<>(JsLoader.load(f), f, new PassthroughResolver<>(this, pointDependencyResolver.get()), f.getName()));
-        } catch (IOException | ScriptException e) {
-            // todo - typed 'api' exception
-            throw new RuntimeException("Failed to load file '" + f.getAbsolutePath() + "'!", e);
+            return Optional.of(new JsScript<>(
+                    JsLoader.load(path),
+                    path,
+                    new PassthroughResolver<>(this, pointDependencyResolver.get()),
+                    path.getFileName().toString()));
+        } catch (ScriptException e) {
+            throw new ModuleCompilationException(e, "Failed to compile script at '" + path.toAbsolutePath() + "'");
         }
     }
 
-    private Optional<Dependency> resolveJson(Path path) {
-        File f = path.toFile();
-        if (!f.exists()) return Optional.empty();
+    private Optional<Dependency> resolveJson(Path path) throws ModuleCompilationException, IOException {
+        if (!Files.exists(path)) return Optional.empty();
         try {
-            return Optional.of(new JsonDependency(JsLoader.parseJson(f)));
-        } catch (IOException ex) {
-            // todo - typed 'api' exception
-            throw new RuntimeException("Failed to load json zip entry '" + f.getName() + "'!", ex);
+            return Optional.of(new JsonDependency(JsLoader.parseJson(path)));
+        } catch (JsonParseException e) {
+            throw new ModuleCompilationException(e, "Failed to parse json at '" + path.toAbsolutePath() + "'");
         }
     }
 
-    private Optional<Dependency> bootstrapDirectory(File directory) throws Exception {
+    /*
+    Assumes that 'directory' exists and is a directory
+     */
+    private Optional<Dependency> bootstrapDirectory(Path directory) throws ModuleCompilationException, IOException {
+
         LogicalModule module = new LogicalModule();
         // first, lets try and find a package.json we can read
         Optional<Dependency> packageJson = this.resolve(directory, "./package.json");
@@ -108,16 +110,17 @@ public class FileSystemResolver implements DependencyResolver<File> {
             try (DependencyLifecycle lifecycle = packageJson.get().depend(module)) {
                 Map packageJsonContents = (Map) lifecycle.getDependencyExports();
                 String main = (String) packageJsonContents.get("main");
-                // todo - this isn't required!!! We should defer to index.js then index.json if main isn't defined...!!!
-                if (main == null)
-                    // todo - typed 'api' exception
-                    throw new RuntimeException("Main js/json file not defined in package.json!");
-                Optional<Dependency> mainDependency = this.resolve(directory, "./" + main);
-                if (!mainDependency.isPresent())
-                    // todo - typed 'api' exception
-                    throw new RuntimeException("Main js/json '" + main + "' does not exist!");
-                module.setInternalDependency(mainDependency.get());
-                return Optional.of(module);
+                if (main != null) {
+                    Optional<Dependency> mainDependency = this.resolve(directory, "./" + main);
+                    if (!mainDependency.isPresent())
+                        throw new FileNotFoundException("'" + main + "' does not exist in the scope of package.json");
+                    module.setInternalDependency(mainDependency.get());
+                    return Optional.of(module);
+                }
+            } catch (ModuleCompilationException | IOException e) {
+                throw e;
+            } catch (Exception e) {
+                throw new RuntimeException("panic - json package close threw an exception!");
             }
         }
 

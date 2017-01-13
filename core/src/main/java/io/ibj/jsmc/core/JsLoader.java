@@ -12,6 +12,8 @@ import jdk.nashorn.api.scripting.NashornScriptEngineFactory;
 import javax.script.CompiledScript;
 import javax.script.ScriptException;
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Map;
 import java.util.Optional;
 
@@ -33,8 +35,8 @@ public class JsLoader {
         return ENGINE.compile(r);
     }
 
-    public static CompiledScript load(File f) throws IOException, ScriptException {
-        try (Reader r = new FileReader(f)) {
+    public static CompiledScript load(Path p) throws IOException, ScriptException {
+        try (Reader r = Files.newBufferedReader(p)) {
             return load(r);
         }
     }
@@ -55,8 +57,8 @@ public class JsLoader {
         }
     }
 
-    public static Object parseJson(File f) throws IOException {
-        try (Reader r = new FileReader(f)) {
+    public static Object parseJson(Path p) throws IOException {
+        try (Reader r = Files.newBufferedReader(p)) {
             return parseJson(r);
         }
     }
