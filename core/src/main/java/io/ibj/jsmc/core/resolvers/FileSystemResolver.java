@@ -1,15 +1,20 @@
 package io.ibj.jsmc.core.resolvers;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonParseException;
 import io.ibj.jsmc.api.Dependency;
 import io.ibj.jsmc.api.DependencyLifecycle;
 import io.ibj.jsmc.api.DependencyResolver;
 import io.ibj.jsmc.api.exceptions.ModuleCompilationException;
-import io.ibj.jsmc.core.JsLoader;
 import io.ibj.jsmc.core.dependencies.JsScript;
 import io.ibj.jsmc.core.dependencies.JsonDependency;
 import io.ibj.jsmc.core.dependencies.LogicalModule;
+import jdk.nashorn.api.scripting.NashornScriptEngine;
+import jdk.nashorn.api.scripting.NashornScriptEngineFactory;
 
+import javax.script.CompiledScript;
+import javax.script.ScriptContext;
 import javax.script.ScriptException;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -19,6 +24,8 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Supplier;
 
 /**
@@ -91,7 +98,7 @@ public class FileSystemResolver implements DependencyResolver<Path> {
         if (!Files.exists(path)) return Optional.empty();
         try (Reader r = Files.newBufferedReader(path)) {
             return Optional.of(new JsScript<>(
-                    JsLoader.load(r, path.relativize(rootPath).toString()),
+                    loadJs(r, path.relativize(rootPath).toString()),
                     path,
                     new PassthroughResolver<>(this, pointDependencyResolver.get()),
                     path.getFileName().toString()));
@@ -103,7 +110,7 @@ public class FileSystemResolver implements DependencyResolver<Path> {
     private Optional<Dependency> resolveJson(Path path) throws ModuleCompilationException, IOException {
         if (!Files.exists(path)) return Optional.empty();
         try {
-            return Optional.of(new JsonDependency(JsLoader.parseJson(path)));
+            return Optional.of(new JsonDependency(loadJson(path)));
         } catch (JsonParseException e) {
             throw new ModuleCompilationException(e, "Failed to parse json at '" + path.toAbsolutePath() + "'");
         }
@@ -147,5 +154,34 @@ public class FileSystemResolver implements DependencyResolver<Path> {
             return Optional.of(module);
         }
         return Optional.empty(); // probably normal directory, not a module.
+    }
+
+    private final NashornScriptEngine engine = (NashornScriptEngine) new NashornScriptEngineFactory().getScriptEngine();
+    private static final Lock engineLock = new ReentrantLock();
+
+    private static final Gson gson = new GsonBuilder().create();
+    /**
+     * Loads and compiles a script from the given reader with the passed source
+     *
+     * @param r      Reader to compile script from
+     * @param source Source location to be reported by internal exceptions
+     * @return Compiled script from reader with source
+     * @throws ScriptException If the script fails to compile, or another assorted error
+     */
+    private CompiledScript loadJs(Reader r, String source) throws ScriptException {
+        engineLock.lock();
+        try {
+            if (source != null)
+                engine.getContext().setAttribute(NashornScriptEngine.FILENAME, source, ScriptContext.ENGINE_SCOPE);
+            return engine.compile(r);
+        } finally {
+            engineLock.unlock();
+        }
+    }
+
+    private Object loadJson(Path p) throws IOException {
+        try (Reader r = Files.newBufferedReader(p)) {
+            return gson.fromJson(r, Map.class);
+        }
     }
 }
