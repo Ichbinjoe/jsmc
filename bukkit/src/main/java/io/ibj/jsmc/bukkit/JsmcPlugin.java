@@ -1,5 +1,7 @@
 package io.ibj.jsmc.bukkit;
 
+import io.ibj.jsmc.api.Dependency;
+import io.ibj.jsmc.api.DependencyManager;
 import io.ibj.jsmc.core.BasicDependencyManager;
 import io.ibj.jsmc.core.resolvers.FileSystemResolver;
 import io.ibj.jsmc.core.resolvers.ModuleResolver;
@@ -41,7 +43,9 @@ public class JsmcPlugin extends JavaPlugin {
     @Override
     public void onDisable() {
         try {
-            dependencyManager.unloadAll();
+            for (DependencyManager.Entry e : dependencyManager.getLoadedModules())
+                dependencyManager.unload(e);
+
         } catch (Exception e) {
             String msg = "" +
                     ERROR_HEADER +

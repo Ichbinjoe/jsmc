@@ -33,7 +33,7 @@ public class SystemDependencyTest {
     }
 
     @Test
-    public void dependencyPassthrough() {
+    public void dependencyPassthrough() throws Exception {
         Object o = new Object();
         Dependency d = new SystemDependency(o);
         DependencyConsumer c = createEmptyConsumer();
@@ -45,7 +45,7 @@ public class SystemDependencyTest {
     }
 
     @Test
-    public void dependencyRejectNullConsumer() {
+    public void dependencyRejectNullConsumer() throws Exception {
         Object o = new Object();
         Dependency d = new SystemDependency(o);
         exception.expect(NullPointerException.class);

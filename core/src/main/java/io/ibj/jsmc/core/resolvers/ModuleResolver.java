@@ -18,9 +18,8 @@ import java.util.regex.Pattern;
  */
 public class ModuleResolver implements DependencyResolver<Path> {
 
-    // a valid module may not have a /, \, space, or . in them
-    private static final Pattern validModulePattern = Pattern.compile("^((?![/\\\\ .]).)*$");
-    private static final Pattern moduleNameExtractionPattern = Pattern.compile("^(((?![/\\\\ .]).)*)((\\.js)|(\\.json))?$");
+    // a valid module may only contain lower case letters, -, _, and numbers
+    public static final Pattern validModulePattern = Pattern.compile("^([a-z-_0-9].)*$");
 
     private final Path rootPath;
     private final DependencyResolver<Path> fileResolver;
