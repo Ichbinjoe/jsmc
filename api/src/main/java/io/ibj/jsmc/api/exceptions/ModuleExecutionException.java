@@ -11,10 +11,10 @@ public class ModuleExecutionException extends Exception {
     /**
      * Creates a ModuleExecutionException with an associated source exception and message
      *
-     * @param e       source exception
+     * @param t       source exception
      * @param message message
      */
-    public ModuleExecutionException(Exception e, String message) {
-        super(message, e);
+    public ModuleExecutionException(Throwable t, String message) {
+        super(message, t);
     }
 }

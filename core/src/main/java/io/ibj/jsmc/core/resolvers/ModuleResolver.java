@@ -11,6 +11,8 @@ import java.util.*;
 import java.util.regex.Pattern;
 
 /**
+ * Resolves dependencies at a module level, delegating all file operations to an internal file dependency resolver
+ *
  * @author Joseph Hirschfeld (Ichbinjoe) [joe@ibj.io]
  * @since 9/9/16
  */
@@ -24,12 +26,21 @@ public class ModuleResolver implements DependencyResolver<Path> {
     private final DependencyResolver<Path> fileResolver;
     private final DependencyResolver<Path> downstreamResolver;
 
+    /**
+     * Creates a new module resolver with a root path, internal file resolver, and a fallback downstream resolver
+     * @param rootPath root path of module resolution
+     * @param fileResolver resolver used to look up files
+     * @param downstreamResolver resolver used when this resolver fails
+     */
     public ModuleResolver(Path rootPath, DependencyResolver<Path> fileResolver, DependencyResolver<Path> downstreamResolver) {
         this.rootPath = rootPath;
         this.fileResolver = fileResolver;
         this.downstreamResolver = downstreamResolver;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Optional<Dependency> resolve(Path requestScope, String dependencyIdentifier) throws ModuleCompilationException, IOException {
         Optional<Dependency> d = Optional.empty();
@@ -68,6 +79,8 @@ public class ModuleResolver implements DependencyResolver<Path> {
         return resolveWithinNodeModules(currentDirectory.getParent(), identifier);
     }
 
+    /*
+    // todo - relocate to javascript loader where it belongs
     public Collection<String> getLoadableModules() throws IOException {
         Path nodeModules = rootPath.resolve("node_modules");
         if (!Files.isDirectory(nodeModules))
@@ -79,5 +92,5 @@ public class ModuleResolver implements DependencyResolver<Path> {
                 moduleNameExtractionPattern.matcher(path.getFileName().toString()).matches()
         ).forEach(p -> ret.add(p.getFileName().toString()));
         return ret;
-    }
+    }*/
 }

@@ -1,5 +1,7 @@
 package io.ibj.jsmc.api;
 
+import io.ibj.jsmc.api.exceptions.ModuleExecutionException;
+
 import java.util.Collection;
 
 /**
@@ -21,7 +23,7 @@ public interface Dependency {
      * @return Lifecycle which exposes the internal state as well as a close method
      * @throws NullPointerException if dependencyConsumer is null
      */
-    DependencyLifecycle depend(DependencyConsumer dependencyConsumer);
+    DependencyLifecycle depend(DependencyConsumer dependencyConsumer) throws ModuleExecutionException;
 
     /**
      * Collection of all dependents of this dependency

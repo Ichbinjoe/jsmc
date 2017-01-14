@@ -22,6 +22,8 @@ import java.util.Optional;
 import java.util.function.Supplier;
 
 /**
+ * DependencyResolver which loads dependencies from a path
+ *
  * @author Joseph Hirschfeld (Ichbinjoe) [joe@ibj.io]
  * @since 9/5/16
  */
@@ -35,11 +37,20 @@ public class FileSystemResolver implements DependencyResolver<Path> {
     private final Supplier<DependencyResolver<Path>> pointDependencyResolver;
     private final Path rootPath;
 
+    /**
+     * Creates a new FileSystemResolver with a dependencyresolver supplier for new js based files, as well as a fs root
+     *
+     * @param pointDependencyResolver DependencyResolver supplier to supply a resolver for new JsScript files to use
+     * @param rootPath                Local root of the project filesystem
+     */
     public FileSystemResolver(Supplier<DependencyResolver<Path>> pointDependencyResolver, Path rootPath) {
         this.pointDependencyResolver = pointDependencyResolver;
         this.rootPath = rootPath;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Optional<Dependency> resolve(Path requestScope, final String dependencyIdentifier) throws ModuleCompilationException, IOException {
         // todo - should we even allow absolute paths? not sure if it is windows compatible (pretty sure it isn't)
@@ -78,7 +89,7 @@ public class FileSystemResolver implements DependencyResolver<Path> {
 
     private Optional<Dependency> resolveJs(Path path) throws ModuleCompilationException, IOException {
         if (!Files.exists(path)) return Optional.empty();
-        try (Reader r = Files.newBufferedReader(path)){
+        try (Reader r = Files.newBufferedReader(path)) {
             return Optional.of(new JsScript<>(
                     JsLoader.load(r, path.relativize(rootPath).toString()),
                     path,

@@ -29,6 +29,13 @@ public class JsLoader {
 
     private static final Gson GSON = new GsonBuilder().create();
 
+    /**
+     * Loads and compiles a script from the given reader with the passed source
+     * @param r Reader to compile script from
+     * @param source Source location to be reported by internal exceptions
+     * @return Compiled script from reader with source
+     * @throws ScriptException If the script fails to compile, or another assorted error
+     */
     public static CompiledScript load(Reader r, String source) throws ScriptException {
         ENGINE_LOCK.lock();
         try {
@@ -39,10 +46,21 @@ public class JsLoader {
         }
     }
 
+    /**
+     * Parses a reader using json into a dynamic object
+     * @param r Reader to read json from
+     * @return dynamic json object
+     */
     public static Object parseJson(Reader r) {
         return GSON.fromJson(r, Map.class);
     }
 
+    /**
+     * Parses a file at the passed path using json into a dynamic object
+     * @param p Path to read json from
+     * @return dynamic json object
+     * @throws IOException if an io based exception occurs
+     */
     public static Object parseJson(Path p) throws IOException {
         try (Reader r = Files.newBufferedReader(p)) {
             return parseJson(r);

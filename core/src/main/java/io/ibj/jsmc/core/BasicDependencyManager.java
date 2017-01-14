@@ -7,6 +7,8 @@ import java.io.IOException;
 import java.util.*;
 
 /**
+ * Simple dependency manager which takes a resolver to draw its modules from
+ *
  * @author Joseph Hirschfeld (Ichbinjoe) [joe@ibj.io]
  * @since 9/13/16
  */
@@ -57,17 +59,32 @@ public class BasicDependencyManager<Scope> implements DependencyManager, Depende
     private final Scope resolutionScope;
     private final Map<Dependency, DEntry> loadedModules;
 
+    /**
+     * Constructs a new dependency manager with resolver and scope
+     * @param dependencyResolver internal dependency resolver
+     * @param resolutionScope scope of module resolution
+     */
     public BasicDependencyManager(DependencyResolver<Scope> dependencyResolver, Scope resolutionScope) {
+        if (dependencyResolver == null)
+            throw new NullPointerException("dependencyResolver cannot be null");
+
         this.dependencyResolver = dependencyResolver;
         this.resolutionScope = resolutionScope;
         this.loadedModules = new HashMap<>();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Collection<Dependency> getDependencies() {
         return loadedModules.keySet();
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public void load(String identifier) throws ModuleAlreadyLoadedException, ModuleCompilationException, ModuleExecutionException, ModuleNotFoundException, IOException {
         identifier = identifier.toLowerCase();
         Optional<Dependency> d = dependencyResolver.resolve(resolutionScope, identifier);
@@ -85,6 +102,9 @@ public class BasicDependencyManager<Scope> implements DependencyManager, Depende
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void unload(Entry moduleEntry) throws ModuleNotLoadedException, ModuleExecutionException {
         DEntry presentEntry = loadedModules.remove(moduleEntry.getReference());
@@ -97,6 +117,9 @@ public class BasicDependencyManager<Scope> implements DependencyManager, Depende
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Collection<Entry> getLoadedModules() {
         // java and it's generics FAIL AGAIN!!
@@ -104,6 +127,9 @@ public class BasicDependencyManager<Scope> implements DependencyManager, Depende
         return (Collection<Entry>) (Collection) loadedModules.values();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void reevaluate(Collection<DependencyConsumer> previouslyEvaluatedConsumers) throws ModuleExecutionException, IOException, ModuleCompilationException {
         List<DEntry> entries = new ArrayList<>(loadedModules.values());
