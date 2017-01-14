@@ -38,7 +38,9 @@ public class JsScript<Scope> implements Dependency, DependencyConsumer, Reportab
      * Creates a new JsScript with a compiled script, dependency resolution scope, dependency resolver, and logger name
      *
      * @param compiledScript    Compiled script which is backing the JsScript
-     * @param scope             Scope of the script * @param resolver          Resolver for this script * @param defaultLoggerName Default logger name for the script. This can be overwritten by the script
+     * @param scope             Scope of the script
+     * @param resolver          Resolver for this script
+     * @param defaultLoggerName Default logger name for the script. This can be overwritten by the script
      */
     public JsScript(CompiledScript compiledScript, Scope scope, DependencyResolver<Scope> resolver, String defaultLoggerName) {
         if (compiledScript == null) throw new NullPointerException("compiledScript cannot be null");
@@ -175,10 +177,14 @@ public class JsScript<Scope> implements Dependency, DependencyConsumer, Reportab
      * {@inheritDoc}
      */
     @Override
-    public void reevaluate(Collection<DependencyConsumer> previouslyEvaluatedConsumers) throws ModuleNotFoundException, IOException, ModuleExecutionException, ModuleCompilationException, ModuleAlreadyLoadedException {
+    public void reevaluate(Collection<DependencyConsumer> previouslyEvaluatedConsumers) throws ModuleNotFoundException, IOException, ModuleExecutionException, ModuleCompilationException {
         if (previouslyEvaluatedConsumers.contains(this)) return;
         previouslyEvaluatedConsumers.add(this);
-        reevaluateDependents(previouslyEvaluatedConsumers);
+        try {
+            reevaluateDependents(previouslyEvaluatedConsumers);
+        } catch (ModuleAlreadyLoadedException e) {
+            throw new RuntimeException("ModuleAlreadyLoadedException thrown during a reevaluate", e);
+        }
     }
 
     protected void reevaluateDependents(Collection<DependencyConsumer> previouslyEvaluatedConsumers) throws ModuleNotFoundException, ModuleExecutionException, ModuleCompilationException, ModuleAlreadyLoadedException, IOException {

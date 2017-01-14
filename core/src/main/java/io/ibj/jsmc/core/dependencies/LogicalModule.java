@@ -100,11 +100,15 @@ public class LogicalModule implements Dependency, DependencyConsumer {
      * {@inheritDoc}
      */
     @Override
-    public void reevaluate(Collection<DependencyConsumer> previouslyEvaluatedConsumers) throws ModuleNotFoundException, IOException, ModuleExecutionException, ModuleCompilationException, ModuleAlreadyLoadedException {
+    public void reevaluate(Collection<DependencyConsumer> previouslyEvaluatedConsumers) throws ModuleNotFoundException, IOException, ModuleExecutionException, ModuleCompilationException {
         if (previouslyEvaluatedConsumers.contains(this)) return;
         previouslyEvaluatedConsumers.add(this);
         closeInternalLifecycle();
-        reevaluateDependents(previouslyEvaluatedConsumers);
+        try {
+            reevaluateDependents(previouslyEvaluatedConsumers);
+        } catch (ModuleAlreadyLoadedException e) {
+            throw new RuntimeException("ModuleAlreadyLoadedException thrown during a reevaluate", e);
+        }
     }
 
     protected void reevaluateDependents(Collection<DependencyConsumer> previouslyEvaluatedConsumers) throws ModuleNotFoundException, ModuleExecutionException, ModuleCompilationException, ModuleAlreadyLoadedException, IOException {

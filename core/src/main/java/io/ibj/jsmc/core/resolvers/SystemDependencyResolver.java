@@ -93,8 +93,8 @@ public class SystemDependencyResolver<Scope> implements SystemDependencyHook, De
             for (DependencyConsumer consumer : previousDependency.getDependents()) {
                 try {
                     consumer.reevaluate(reevalSession);
-                } catch (ModuleExecutionException | IOException | ModuleAlreadyLoadedException |
-                        ModuleCompilationException | ModuleNotFoundException e) {
+                } catch (ModuleExecutionException | IOException | ModuleCompilationException |
+                        ModuleNotFoundException e) {
                     throw new RuntimeException("On a module reevaluate, a module was unable to load and reevaluate", e);
                 }
             }
