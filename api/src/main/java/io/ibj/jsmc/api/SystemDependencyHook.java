@@ -47,6 +47,8 @@ public interface SystemDependencyHook {
      * {@link SystemDependencyHook#set(String, Dependency)} call, or a reload trigger from somewhere else. This method
      * should almost never be used.
      *
+     *
+     * @deprecated no unit tests, no impact at the moment
      * @param label  label for the new dependency
      * @param object dependency object for resolution
      * @throws IllegalArgumentException if the label passed does not follow module naming conventions

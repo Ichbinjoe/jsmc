@@ -37,7 +37,6 @@ public class PassthroughResolver<Scope> implements DependencyResolver<Scope> {
     /**
      * {@inheritDoc}
      */
-
     @Override
     public Optional<Dependency> resolve(Scope requestScope, String dependencyIdentifier) throws ModuleCompilationException, IOException {
         Optional<Dependency> ret = fileSystemResolver.resolve(requestScope, dependencyIdentifier);

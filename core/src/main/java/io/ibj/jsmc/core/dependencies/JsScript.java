@@ -65,6 +65,7 @@ import java.util.stream.Collectors;
  * @author Joseph Hirschfeld (Ichbinjoe) [joe@ibj.io]
  * @since 9/5/16
  */
+// todo - add console support: https://developer.mozilla.org/en-US/docs/Web/API/Console
 public class JsScript<Scope> implements Dependency, DependencyConsumer, Reportable, Loggable {
 
     private final CompiledScript compiledScript;

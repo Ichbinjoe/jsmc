@@ -4,7 +4,6 @@ import io.ibj.jsmc.api.Dependency;
 import io.ibj.jsmc.api.DependencyConsumer;
 import io.ibj.jsmc.api.DependencyResolver;
 import io.ibj.jsmc.api.SystemDependencyHook;
-import io.ibj.jsmc.api.exceptions.ModuleAlreadyLoadedException;
 import io.ibj.jsmc.api.exceptions.ModuleCompilationException;
 import io.ibj.jsmc.api.exceptions.ModuleExecutionException;
 import io.ibj.jsmc.api.exceptions.ModuleNotFoundException;
