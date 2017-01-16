@@ -55,8 +55,9 @@ public class LogicalModule implements Dependency, DependencyConsumer {
             internalLifecycle.close();
         } catch (Exception e) {
             Throwable mee = new ModuleExecutionException(e, "Exception occurred while closing an internal lifecycle!");
-            if (internalLifecycle.getParentDependency() instanceof Reportable)
-                ((Reportable) internalLifecycle.getParentDependency()).report(mee);
+            Dependency internalDependency = internalLifecycle.getParentDependency();
+            if (internalDependency instanceof Reportable)
+                ((Reportable) internalDependency).report(mee);
             else // todo - could we not throw a runtime exception here?
                 throw new RuntimeException("Failed to close internal lifecycle, and could not report. Fatal!", mee);
         }
@@ -67,6 +68,9 @@ public class LogicalModule implements Dependency, DependencyConsumer {
      */
     @Override
     public DependencyLifecycle depend(DependencyConsumer dependencyConsumer) throws ModuleExecutionException {
+        if (dependencyConsumer == null)
+            throw new NullPointerException("dependencyConsumer cannot be null");
+
         DependencyLifecycle dl = dependencyLifecycleMap.get(dependencyConsumer);
         if (dl == null) {
             dl = new SimpleDependencyLifecycle(this, getInternalExports(), () -> releaseLifecycle(dependencyConsumer));

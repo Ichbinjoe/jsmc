@@ -1,24 +1,25 @@
-package io.ibj.jsmc.api;
+package io.ibj.jsmc.core.dependencies;
 
+import io.ibj.jsmc.api.*;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 
 /**
- * Tests {@link SystemDependency}
+ * Tests {@link JsonDependency}
  *
  * @author Joseph Hirschfeld [Ichbinjoe] (joe@ibj.io)
- * @since 1/12/17
+ * @since 1/15/17
  */
-public class SystemDependencyTest extends DependencyContractTest {
+public class JsonDependencyTest extends DependencyContractTest {
 
     @Test
     public void testDependencyLifecycleGetExportReturnsConstructorObject() throws Exception {
         DependencyConsumer consumer = mock(DependencyConsumer.class);
         Object object = new Object();
 
-        Dependency dependency = new SystemDependency(object);
+        Dependency dependency = new JsonDependency(object);
 
         DependencyLifecycle lifecycle = dependency.depend(consumer);
 
@@ -27,6 +28,6 @@ public class SystemDependencyTest extends DependencyContractTest {
 
     @Override
     public Dependency createNewTestable() {
-        return new SystemDependency(new Object());
+        return new JsonDependency(new Object());
     }
 }

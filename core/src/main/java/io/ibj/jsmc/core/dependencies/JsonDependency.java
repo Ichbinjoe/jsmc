@@ -34,6 +34,9 @@ public class JsonDependency implements Dependency {
      */
     @Override
     public DependencyLifecycle depend(DependencyConsumer dependencyConsumer) {
+        if (dependencyConsumer == null)
+            throw new NullPointerException("dependencyConsumer cannot be null");
+
         return dependentLifecycleCache.computeIfAbsent(dependencyConsumer,
                 dc -> new SimpleDependencyLifecycle(this, object, () -> releaseLifecycle(dc)));
     }

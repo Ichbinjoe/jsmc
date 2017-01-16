@@ -101,7 +101,7 @@ public class FileSystemResolver implements DependencyResolver<Path> {
                     loadJs(r, path.relativize(rootPath).toString()),
                     path,
                     new PassthroughResolver<>(this, pointDependencyResolver.get()),
-                    path.getFileName().toString()));
+                    path.getFileName().toString(), true));
         } catch (ScriptException e) {
             throw new ModuleCompilationException(e, "Failed to compile script at '" + path.toAbsolutePath() + "'");
         }

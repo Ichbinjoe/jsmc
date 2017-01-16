@@ -1,11 +1,13 @@
 package io.ibj.jsmc.api;
 
-import org.junit.Assert;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
-import static org.junit.Assert.*;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.mockito.Mockito.mock;
 
 /**
  * Tests {@link SimpleDependencyLifecycle}
@@ -13,74 +15,72 @@ import static org.junit.Assert.*;
  * @author Joseph Hirschfeld [Ichbinjoe] (joe@ibj.io)
  * @since 1/12/17
  */
-public class SimpleDependencyLifecycleTest {
-
-    @Rule
-    public final ExpectedException exception = ExpectedException.none();
+public class SimpleDependencyLifecycleTest extends DependencyLifecycleContractTest {
 
     @Test
-    public void constructorAllNullParent() {
+    public void testConstructorNullParentThrowsNullPointerException() {
         exception.expect(NullPointerException.class);
         new SimpleDependencyLifecycle(null, new Object(), () -> {
         });
     }
 
     @Test
-    public void doubleClose() throws Exception {
-        Object o = new Object();
-        Dependency d = new SystemDependency(o);
-        SimpleDependencyLifecycle l = new SimpleDependencyLifecycle(d, o);
-        l.close();
+    public void testCallbackCalledWhenLifecycleIsClosed() throws Exception {
+        Dependency dependency = mock(Dependency.class);
+        Object object = new Object();
 
-        exception.expect(IllegalStateException.class);
-        l.close();
-    }
+        final AtomicBoolean callbackHit = new AtomicBoolean(false);
 
-    @Test
-    public void accessAfterClose() throws Exception {
-        Object o = new Object();
-        Dependency d = new SystemDependency(o);
-        SimpleDependencyLifecycle l = new SimpleDependencyLifecycle(d, o);
-
-        l.close();
-
-        exception.expect(IllegalStateException.class);
-        l.getDependencyExports();
-    }
-
-    @Test
-    public void sameExportsAsPassed() throws Exception {
-        Object o = new Object();
-        Dependency d = new SystemDependency(o);
-        SimpleDependencyLifecycle l = new SimpleDependencyLifecycle(d, o);
-
-        Assert.assertEquals(o, l.getDependencyExports());
-        Assert.assertEquals(d, l.getParentDependency());
-    }
-
-    @Test
-    public void callbackCalled() throws Exception {
-        Object o = new Object();
-        Dependency d = new SystemDependency(o);
-        boolean[] callbackHit = new boolean[1];
-        callbackHit[0] = false;
-        Runnable r = () -> {
-            if (callbackHit[0]) throw new IllegalStateException("Callback called twice");
-            callbackHit[0] = true;
+        Runnable callBack = () -> {
+            boolean callbackHitPreviously = callbackHit.getAndSet(true);
+            if (callbackHitPreviously)
+                throw new IllegalStateException("Callback called twice");
         };
-        SimpleDependencyLifecycle l = new SimpleDependencyLifecycle(d, o, r);
 
-        l.close();
+        SimpleDependencyLifecycle lifecycle = new SimpleDependencyLifecycle(dependency, object, callBack);
 
-        Assert.assertTrue(callbackHit[0]);
-        callbackHit[0] = false;
+        lifecycle.close();
+
+        assertTrue(callbackHit.get());
+    }
+
+    @Test
+    public void testCallbackOnlyCalledOnceWhenLifecycleDoubleClosed() throws Exception {
+        Dependency dependency = mock(Dependency.class);
+        Object object = new Object();
+
+        final AtomicBoolean callbackHit = new AtomicBoolean(false);
+
+        Runnable callBack = () -> {
+            boolean callbackHitPreviously = callbackHit.getAndSet(true);
+            if (callbackHitPreviously)
+                throw new IllegalStateException("Callback called twice");
+        };
+
+        SimpleDependencyLifecycle lifecycle = new SimpleDependencyLifecycle(dependency, object, callBack);
+
+        lifecycle.close();
+
+        callbackHit.set(false);
+
         try {
-            l.close();
+            lifecycle.close();
         } catch (IllegalStateException e) {
-            Assert.assertFalse(callbackHit[0]);
+            // A true callbackHit would mean that the callback was called again, even though the close was an illegal invocation
+            assertFalse(callbackHit.get());
             return;
         }
-        // no exception
-        Assert.fail();
+        // the test should never get here. the second #close should always result in an IllegalStateException
+        fail();
+    }
+
+    @Override
+    Resources createNewTestable(DependencyConsumer consumer) {
+        Dependency dependency = mock(Dependency.class);
+        Object internalObject = new Object();
+        SimpleDependencyLifecycle lifecycle = new SimpleDependencyLifecycle(dependency, internalObject, () -> {
+        });
+
+        return new Resources(dependency, lifecycle, internalObject);
     }
 }

@@ -1,6 +1,5 @@
 package io.ibj.jsmc.bukkit;
 
-import io.ibj.jsmc.api.Dependency;
 import io.ibj.jsmc.api.DependencyManager;
 import io.ibj.jsmc.core.BasicDependencyManager;
 import io.ibj.jsmc.core.resolvers.FileSystemResolver;
@@ -8,7 +7,6 @@ import io.ibj.jsmc.core.resolvers.ModuleResolver;
 import io.ibj.jsmc.core.resolvers.SystemDependencyResolver;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
