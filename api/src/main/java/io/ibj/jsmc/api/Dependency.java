@@ -19,7 +19,7 @@ public interface Dependency {
      *
      * If a consumer asks for multiple lifecycles, the same should be returned.
      *
-     * @param dependencyConsumer Comsumer to which the lifecycle should be tied to
+     * @param dependencyConsumer Consumer to which the lifecycle should be tied to
      * @return Lifecycle which exposes the internal state as well as a close method
      * @throws ModuleExecutionException if depending on the object causes execution, and thus causes another exception
      * @throws NullPointerException if dependencyConsumer is null
