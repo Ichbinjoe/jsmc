@@ -5,8 +5,6 @@ import io.ibj.jsmc.api.exceptions.ModuleCompilationException;
 import java.io.IOException;
 import java.util.Optional;
 
-// todo - tests
-
 /**
  * A method of resolving dependencies given context to a certain scope. Scope may be anything, but commonly refer to a
  * path on the filesystem.

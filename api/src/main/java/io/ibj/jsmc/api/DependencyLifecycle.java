@@ -1,7 +1,5 @@
 package io.ibj.jsmc.api;
 
-// todo - tests
-
 /**
  * Lifecycle relationship between a {@link Dependency} and a {@link DependencyConsumer}. Exposes the internal state of a
  * dependency, and allows for closure of the link through an {@link AutoCloseable} interface

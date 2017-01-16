@@ -1,14 +1,11 @@
 package io.ibj.jsmc.api;
 
-import io.ibj.jsmc.api.exceptions.ModuleAlreadyLoadedException;
 import io.ibj.jsmc.api.exceptions.ModuleCompilationException;
 import io.ibj.jsmc.api.exceptions.ModuleExecutionException;
 import io.ibj.jsmc.api.exceptions.ModuleNotFoundException;
 
 import java.io.IOException;
 import java.util.Collection;
-
-// todo - tests
 
 /**
  * Able to consume {@link Dependency}s. Also able to reevaluate all of the dependencies in which it holds
