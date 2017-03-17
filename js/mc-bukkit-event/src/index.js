@@ -1,15 +1,16 @@
-var bacon = require("baconjs")
-var plugin = require("mc-bukkit-plugin")
-var c = require("mc-bukkit-consts")
-var Class = Java.type("java.lang.Class")
+const bacon = require("baconjs")
+const plugin = require("mc-bukkit-plugin")
+const c = require("mc-bukkit-consts")
 
-var GenericListener = Java.extend(c.Listener, {})
+const Class = Java.type("java.lang.Class")
+
+const GenericListener = Java.extend(c.Listener, {})
 
 module.generator = () => {
-  var pendingStreams = []
+  const pendingStreams = []
   return {
     close: () => {
-      var streamClose
+      let streamClose
       while ((streamClose = pendingStreams.pop()) != null)
         streamClose()
     },
@@ -18,26 +19,26 @@ module.generator = () => {
         eventspec = eventspec.class
       }
       if (!(Class.class.isInstance(eventspec))) {
-        var eventType = eventspec.event
-        var priority = eventspec.priority || c.EventPriority.NORMAL
-        var ignoreCancelled = eventspec.ignoreCancelled || true
+        const eventType = eventspec.event
+        const priority = eventspec.priority || c.EventPriority.NORMAL
+        const ignoreCancelled = eventspec.ignoreCancelled || true
       } else {
-        var eventType = eventspec
-        var priority = c.EventPriority.NORMAL
-        var ignoreCancelled = true
+        const eventType = eventspec
+        const priority = c.EventPriority.NORMAL
+        const ignoreCancelled = true
       }
 
       return bacon.fromBinder(sink => {
-        var listener = new GenericListener() // new listener
-        var MyHandlerType = Java.extend(c.EventExecutor, (listener, event) =>
+        const listener = new GenericListener() // new listener
+        const MyHandlerType = Java.extend(c.EventExecutor, (listener, event) =>
           sink(new bacon.Next(event))
         )
 
         c.Bukkit.getPluginManager().
           registerEvent(eventType, listener, priority, new MyHandlerType(), 
-                        plugin.jsmc, ignoreCancelled) 
+            plugin.jsmc, ignoreCancelled) 
 
-        var cleanup = () => {
+        let cleanup = () => {
           c.HandlerList.unregisterAll(listener)
         }
         

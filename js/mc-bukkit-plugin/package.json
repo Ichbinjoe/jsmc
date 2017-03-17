@@ -2,7 +2,7 @@
   "name": "mc-bukkit-plugin",
   "version": "1.0.0",
   "description": "jsmc bukkit basic plugin resolution module",
-  "main": "index.js",
   "author": "Joe Hirschfeld <joe@ibj.io> (Ichbinjoe)",
-  "license": "MIT"
+  "license": "MIT",
+  "main": "index.js"
 }

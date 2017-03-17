@@ -1,11 +1,11 @@
 {
-    "blacklistedModules": [
-        "moduleA",
-        "moduleB"
-    ],
-    "comment": "If the dot is removed, then basic-loader will only load the modules below",
-    ".whitelistedModules": [
-        "moduleC",
-        "moduleD"
-    ]
+  "blacklistedModules": [
+    "moduleA",
+    "moduleB"
+  ],
+  ".comment": "If the dot is removed, then basic-loader will only load the modules below",
+  ".whitelistedModules": [
+    "moduleC",
+    "moduleD"
+  ]
 }

@@ -2,11 +2,10 @@ var bacon = require("baconjs")
 var plugin = require("mc-bukkit-plugin")
 var c = require("mc-bukkit-consts")
 
-var commandMapField = c.Bukkit.getPluginManager().getClass().getDeclaredField("commandMap")
+var commandMapField = c.Bukkit.getPluginManager()
+  .getClass().getDeclaredField("commandMap")
 commandMapField.setAccessible(true)
 var commandMap = commandMapField.get(c.Bukkit.getPluginManager())
-
-var Arrays = Java.type("java.util.Arrays")
 
 module.generator = () => {
   var commandTeardowns = []

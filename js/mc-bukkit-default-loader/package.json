@@ -2,6 +2,8 @@
   "name": "mc-bukkit-default-loader",
   "version": "1.0.0",
   "description": "jsmc bukkit default module loader",
+  "author": "Joe Hirschfeld <joe@ibj.io> (Ichbinjoe)",
+  "license": "MIT",
   "main": "lib/index.js",
   "dependencies": {
     "mc-bukkit-command": "^1.0.0",
@@ -17,11 +19,10 @@
     "build": "babel src/ --out-dir lib/",
     "clean": "rimraf lib/"
   },
-  "author": "Joe Hirschfeld <joe@ibj.io> (Ichbinjoe)",
-  "license": "MIT",
   "babel": {
     "presets": [
       "es2015"
-    ]
+    ],
+    "retainLines": true
   }
 }

@@ -1,14 +1,14 @@
-var c = require("mc-bukkit-consts")
-var plugin = require("mc-bukkit-plugin")
-var wrapRunnable = require("../no_translate/wrap_bukkitrunnable.js")
+const c = require("mc-bukkit-consts")
+const plugin = require("mc-bukkit-plugin")
+const wrapRunnable = require("../no_translate/wrap_bukkitrunnable.js")
 
-var synch = {
-    now: (br) => br.runTask(plugin.jsmc),
-    later: (br, delay) => br.runTaskLater(plugin.jsmc, delay),
-    timer: (br, delay, period) => br.runTaskTimer(plugin.jsmc, delay, period)
+const synch = {
+  now: (br) => br.runTask(plugin.jsmc),
+  later: (br, delay) => br.runTaskLater(plugin.jsmc, delay),
+  timer: (br, delay, period) => br.runTaskTimer(plugin.jsmc, delay, period)
 }
 
-var asynch = {
+const asynch = {
   now: (br) => br.runTaskAsynchronously(plugin.jsmc),
   later: (br, delay) => br.runTaskLaterAsynchronously(plugin.jsmc, delay),
   timer: (br, delay, period) => br.runTaskTimerAsynchronously(
@@ -26,16 +26,16 @@ function wrapOnEnd(runnable, end) {
 }
 
 function createScheduler(bindings) {
-  var cleanupRunnables = {}
-  var create = function(invoker) {
-    var internalState = {
+  const cleanupRunnables = {}
+  const create = invoker => {
+    const internalState = {
     }
   
-    var cleanupFunc = () => {
+    const cleanupFunc = () => {
       internalState.task.cancel()
     }
 
-    var statusObject = {
+    const statusObject = {
       cancel: () => {
         cleanupFunc()
         delete cleanupRunnables[internalState] 
@@ -82,8 +82,8 @@ function createScheduler(bindings) {
 }
 
 module.generator = () => {
-  var syncSched = createScheduler(synch)
-  var asyncSched = createScheduler(asynch)
+  const syncSched = createScheduler(synch)
+  const asyncSched = createScheduler(asynch)
   return {
     exports: {
       sync: syncSched.exports,

@@ -2,9 +2,12 @@
   "name": "mc-bukkit-event",
   "version": "1.0.0",
   "description": "jsmc bukkit event streamer",
+  "author": "Joe Hirschfeld <joe@ibj.io> (Ichbinjoe)",
+  "license": "MIT",
   "main": "lib/index.js",
   "dependencies": {
     "baconjs": "^0.7.87",
+    "mc-bukkit-consts": "^1.0.0",
     "mc-bukkit-plugin" : "^1.0.0"
   },
   "devDependencies": {
@@ -16,11 +19,10 @@
     "build": "babel src/ --out-dir lib/",
     "clean": "rimraf lib/"
   },
-  "author": "Joe Hirschfeld <joe@ibj.io> (Ichbinjoe)",
-  "license": "MIT",
   "babel": {
     "presets": [
       "es2015"
-    ]
+    ],
+    "retainLines": true
   }
 }
