@@ -18,14 +18,17 @@ module.generator = () => {
       if (eventspec.class != null) {
         eventspec = eventspec.class
       }
+      let eventType
+      let priority
+      let ignoreCancelled
       if (!(Class.class.isInstance(eventspec))) {
-        const eventType = eventspec.event
-        const priority = eventspec.priority || c.EventPriority.NORMAL
-        const ignoreCancelled = eventspec.ignoreCancelled || true
+        eventType = eventspec.event
+        priority = eventspec.priority || c.EventPriority.NORMAL
+        ignoreCancelled = eventspec.ignoreCancelled || true
       } else {
-        const eventType = eventspec
-        const priority = c.EventPriority.NORMAL
-        const ignoreCancelled = true
+        eventType = eventspec
+        priority = c.EventPriority.NORMAL
+        ignoreCancelled = true
       }
 
       return bacon.fromBinder(sink => {

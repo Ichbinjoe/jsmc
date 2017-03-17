@@ -1,10 +1,26 @@
 plugins {
-    id 'com.github.johnrengelman.shadow' version '1.2.3'
+    id 'com.github.johnrengelman.shadow' version '1.2.4'
 }
 
 dependencies {
     compile project(":core")
     compile group: "org.spigotmc", name: "spigot-api", version: "1.11.2-R0.1-SNAPSHOT"
+}
+
+processResources.dependsOn ":js:zip"
+def resourceZipDir = new File(project(":js").buildDir, "zip")
+processResources.inputs.dir(resourceZipDir)
+
+sourceSets {
+    main {
+        resources {
+            srcDir resourceZipDir
+        }
+    }
+}
+
+jar {
+    baseName 'jsmc'
 }
 
 shadowJar {
@@ -13,4 +29,6 @@ shadowJar {
             return it.moduleGroup == "jsmc"
         })
     }
+    archiveName = "jsmc.${extension}"
 }
+

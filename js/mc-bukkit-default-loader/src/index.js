@@ -26,8 +26,8 @@ function sendHelp(sender) {
 }
 
 function joinStrCol(col, sep) {
-  const a = ""
-  for (let i in col) {
+  let a = ""
+  for (const i in col) {
     if (a != "")
       a += sep
     a += col[i] 
@@ -36,10 +36,10 @@ function joinStrCol(col, sep) {
 }
 
 function filter(col, pred) {
-  let a = []
-  let itr = col.iterator()
+  const a = []
+  const itr = col.iterator()
   while (itr.hasNext()) {
-    let e = itr.next()
+    const e = itr.next()
     if (pred(e))
       a.push(e)
   }
@@ -47,8 +47,8 @@ function filter(col, pred) {
 }
 
 function mapJCol(col, func) {
-  let a = []
-  let itr = col.iterator()
+  const a = []
+  const itr = col.iterator()
   while (itr.hasNext())
     a.push(func(itr.next()))
   return a
@@ -67,15 +67,15 @@ function loadedModuleNames() {
 }
 
 function unloadedModuleNames() {
-  let lmn = loadedModuleNames()
+  const lmn = loadedModuleNames()
   return filter(loadableModuleNames(), a => lmn.indexOf(a) == -1)
 }
 
 function findLoadedModule(name) {
-  let lm = manager.getLoadedModules()
-  let itr = lm.iterator()
+  const lm = manager.getLoadedModules()
+  const itr = lm.iterator()
   while (itr.hasNext()) {
-    let e = itr.next()
+    const e = itr.next()
     if (e.getIdentifier().equals(name))
       return e
   }

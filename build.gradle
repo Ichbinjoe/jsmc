@@ -2,11 +2,9 @@ group 'io.ibj'
 version '1.0-SNAPSHOT'
 
 defaultTasks 'clean', 'build', 'shadow', 'test'
-
-subprojects.forEach { p ->
-    p.apply plugin: 'java'
-
-    p.repositories {
+configure(subprojects.findAll({p -> p.name != "js"}), {
+    apply plugin: "java"
+    repositories {
         mavenCentral()
         maven {
             url 'https://hub.spigotmc.org/nexus/content/groups/public/'
@@ -15,24 +13,23 @@ subprojects.forEach { p ->
             url "https://oss.sonatype.org/content/groups/public/"
         }
     }
-
-    p.dependencies {
+    dependencies {
         testCompile group: 'junit', name: 'junit', version: '4.12'
         testCompile group: 'org.mockito', name: 'mockito-core', version: '2.+'
-        testCompile group: 'org.projectlombok', name:'lombok', version: '1.16.12'
+        testCompile group: 'org.projectlombok', name: 'lombok', version: '1.16.12'
     }
 
-    p.tasks.withType(JavaCompile) {
+    tasks.withType(JavaCompile) {
         sourceCompatibility = "1.8"
         targetCompatibility = "1.8"
     }
 
-    p.test {
+    test {
         testLogging {
             events "PASSED", "FAILED", "SKIPPED"
         }
     }
-}
+})
 
 task wrapper(type: Wrapper) {
     gradleVersion = '3.3'

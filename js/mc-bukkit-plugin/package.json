@@ -1,8 +1,12 @@
 {
   "name": "mc-bukkit-plugin",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "jsmc bukkit basic plugin resolution module",
   "author": "Joe Hirschfeld <joe@ibj.io> (Ichbinjoe)",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Ichbinjoe/jsmc.git"
+  },
   "main": "index.js"
 }

@@ -1,0 +1,67 @@
+def buildable = ['mc-bukkit-command', 'mc-bukkit-default-loader', 'mc-bukkit-event', 'mc-bukkit-scheduler']
+def allModules = ['mc-bukkit-consts', 'mc-bukkit-plugin']
+allModules.addAll(buildable)
+
+task build {
+    doLast {
+        buildable.forEach { m ->
+            exec {
+                workingDir file(m)
+                commandLine 'npm', 'run', 'build'
+            }
+        }
+    }
+}
+
+task prepareZip(dependsOn:build) {
+    doLast {
+        mkdir "$buildDir/package/mc-bukkit-default-loader"
+        copy {
+            from 'mc-bukkit-default-loader'
+            exclude '**/node_modules'
+            into "$buildDir/package/mc-bukkit-default-loader"
+        }
+        mkdir "$buildDir/package/mc-bukkit-default-loader/node_modules"
+        ['mc-bukkit-command', 'mc-bukkit-consts', 'mc-bukkit-plugin'].forEach { m ->
+            mkdir "$buildDir/package/mc-bukkit-default-loader/node_modules/$m"
+            copy {
+                from "$m"
+                exclude '**/node_modules'
+                into "$buildDir/package/mc-bukkit-default-loader/node_modules/$m"
+            }
+        }
+    }
+}
+
+task zip(type:Zip,dependsOn:prepareZip) {
+    archiveName 'package.zip'
+    destinationDir = file("$buildDir/zip")
+    from (files("$buildDir/package"))
+}
+
+zip.outputs.dir(new File(buildDir, "zip"))
+
+task clean() {
+    doLast {
+        buildable.forEach { m ->
+            exec {
+                workingDir file(m)
+                commandLine 'npm', 'run', 'clean'
+            }
+        }
+
+        delete "$buildDir/"
+    }
+}
+
+task publish(dependsOn: build) {
+    doLast {
+        allModules.forEach { m ->
+            exec {
+                workingDir file(m)
+                commandLine 'npm', 'publish'
+            }
+        }
+    }
+}
+
