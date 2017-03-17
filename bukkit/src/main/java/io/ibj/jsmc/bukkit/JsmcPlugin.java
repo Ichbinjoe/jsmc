@@ -105,16 +105,4 @@ public class JsmcPlugin extends JavaPlugin {
         }
     }
 
-    public Collection<String> getLoadableModules() throws IOException {
-        Path nodeModules = Bukkit.getWorldContainer().toPath().resolve("node_modules");
-        if (!Files.isDirectory(nodeModules))
-            return Collections.EMPTY_SET;
-
-        Set<String> ret = new HashSet<>();
-
-        Files.newDirectoryStream(nodeModules, path ->
-                ModuleResolver.validModulePattern.matcher(path.getFileName().toString()).matches()
-        ).forEach(p -> ret.add(p.getFileName().toString()));
-        return ret;
-    }
 }

@@ -3,8 +3,8 @@ const c = require("mc-bukkit-consts")
 const cmd = require("mc-bukkit-command")
 const settings = require("../settings")
 
-const HashMap = Java.type("java.util.HashMap")
 const ArrayList = Java.type("java.util.ArrayList")
+const HashMap = Java.type("java.util.HashMap")
 const List = Java.type("java.util.List")
 
 const EmptyList = new ArrayList()
@@ -59,7 +59,7 @@ function idMap(entries) {
 }
 
 function loadableModuleNames() {
-  return plugin.jsmc.getLoadableModules()
+  return manager.getLoadableModules()
 }
 
 function loadedModuleNames() {

@@ -78,5 +78,16 @@ public class ModuleResolver implements DependencyResolver<Path> {
         return resolveWithinNodeModules(currentDirectory.getParent(), identifier);
     }
 
-    // todo - relocate to javascript loader where it belongs
+    public Collection<String> getLoadableModules() throws IOException {
+        Path nodeModules = rootPath.resolve("node_modules");
+        if (!Files.isDirectory(nodeModules))
+            return Collections.EMPTY_SET;
+
+        Set<String> ret = new HashSet<>();
+
+        Files.newDirectoryStream(nodeModules, path ->
+                ModuleResolver.validModulePattern.matcher(path.getFileName().toString()).matches()
+        ).forEach(p -> ret.add(p.getFileName().toString()));
+        return ret;
+    }
 }
