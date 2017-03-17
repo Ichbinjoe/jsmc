@@ -6,6 +6,8 @@ var commandMapField = c.Bukkit.getPluginManager().getClass().getDeclaredField("c
 commandMapField.setAccessible(true)
 var commandMap = commandMapField.get(c.Bukkit.getPluginManager())
 
+var Arrays = Java.type("java.util.Arrays")
+
 module.generator = () => {
   var commandTeardowns = []
   return {
@@ -23,13 +25,13 @@ module.generator = () => {
       var CmdType = Java.extend(c.Command, {
         execute: (sender, label, args) => {
           if (internalDat.cmdHandler != null) {
-            return internalDat.cmdHandler(sender, args, label) && true
+            return internalDat.cmdHandler(sender, label, args) && true
           }
           return false
         },
-        tabComplete: (sender, alias, args, location) => {
-          if (internaldat.tabHandler != null) {
-            return internalDat.tabHandler(sender, args, label, command)
+        tabComplete: (sender, label, args, location) => {
+          if (internalDat.tabHandler != null) {
+            return internalDat.tabHandler(sender, label, args, location)
           }
           return c.Bukkit.matchPlayer(args[args.length - 1])
         }

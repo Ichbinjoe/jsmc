@@ -70,7 +70,7 @@ public class FileSystemResolver implements DependencyResolver<Path> {
 
         Path requestPath = requestScope.resolve(dependencyIdentifier);
         return resolve(requestPath, p -> {
-            if (Files.isDirectory(p))
+            if (Files.exists(p) && Files.isDirectory(p.toRealPath()))
                 return bootstrapDirectory(p);
             else if (dependencyIdentifier.endsWith(".js"))
                 return resolve(p, this::resolveJs);
@@ -98,7 +98,7 @@ public class FileSystemResolver implements DependencyResolver<Path> {
         if (!Files.exists(path)) return Optional.empty();
         try (Reader r = Files.newBufferedReader(path)) {
             return Optional.of(new JsScript<>(
-                    loadJs(r, path.relativize(rootPath).toString()),
+                    loadJs(r, rootPath.relativize(path).normalize().toString()),
                     path,
                     new PassthroughResolver<>(this, pointDependencyResolver.get()),
                     path.getFileName().toString(), true));

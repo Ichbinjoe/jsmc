@@ -6,7 +6,10 @@ function fillIn(pkg, types) {
 
   for (typeIdx in types) {
     var type = types[typeIdx]
-    module.exports[type] = Java.type(pkg + "." + type)
+    try {
+        module.exports[type] = Java.type(pkg + "." + type)
+    } catch (e) {
+    }
   }
 }
 

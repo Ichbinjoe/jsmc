@@ -10,7 +10,13 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.logging.Level;
 
 // todo - configurable default folder. May mean forcing instantiation of resolvers at 'onEnable'
@@ -27,7 +33,7 @@ public class JsmcPlugin extends JavaPlugin {
     private final SystemDependencyResolver<Path> systemDependencyResolver;
     private final SystemDependencyResolver<Path> addOnDependencyResolver;
     private ModuleResolver moduleResolver = null;
-    private final BasicDependencyManager<Path> dependencyManager;
+    public final BasicDependencyManager<Path> dependencyManager;
 
     public JsmcPlugin() {
         Path rootPath = Bukkit.getWorldContainer().toPath();
@@ -97,5 +103,18 @@ public class JsmcPlugin extends JavaPlugin {
             setEnabled(false);
             return;
         }
+    }
+
+    public Collection<String> getLoadableModules() throws IOException {
+        Path nodeModules = Bukkit.getWorldContainer().toPath().resolve("node_modules");
+        if (!Files.isDirectory(nodeModules))
+            return Collections.EMPTY_SET;
+
+        Set<String> ret = new HashSet<>();
+
+        Files.newDirectoryStream(nodeModules, path ->
+                ModuleResolver.validModulePattern.matcher(path.getFileName().toString()).matches()
+        ).forEach(p -> ret.add(p.getFileName().toString()));
+        return ret;
     }
 }

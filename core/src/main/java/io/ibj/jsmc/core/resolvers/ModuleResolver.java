@@ -19,7 +19,7 @@ import java.util.regex.Pattern;
 public class ModuleResolver implements DependencyResolver<Path> {
 
     // a valid module may only contain lower case letters, -, _, and numbers
-    public static final Pattern validModulePattern = Pattern.compile("^([a-z-_0-9].)*$");
+    public static final Pattern validModulePattern = Pattern.compile("^([a-z-_0-9])*$");
 
     private final Path rootPath;
     private final DependencyResolver<Path> fileResolver;
@@ -78,18 +78,5 @@ public class ModuleResolver implements DependencyResolver<Path> {
         return resolveWithinNodeModules(currentDirectory.getParent(), identifier);
     }
 
-    /*
     // todo - relocate to javascript loader where it belongs
-    public Collection<String> getLoadableModules() throws IOException {
-        Path nodeModules = rootPath.resolve("node_modules");
-        if (!Files.isDirectory(nodeModules))
-            return Collections.EMPTY_SET;
-
-        Set<String> ret = new HashSet<>();
-
-        Files.newDirectoryStream(nodeModules, path ->
-                moduleNameExtractionPattern.matcher(path.getFileName().toString()).matches()
-        ).forEach(p -> ret.add(p.getFileName().toString()));
-        return ret;
-    }*/
 }
