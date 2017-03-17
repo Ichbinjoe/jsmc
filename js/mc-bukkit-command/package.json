@@ -6,7 +6,6 @@
   "license": "MIT",
   "main": "lib/index.js",
   "dependencies": {
-    "baconjs": "^0.7.92",
     "mc-bukkit-consts": "^1.0.0",
     "mc-bukkit-plugin": "^1.0.0"
   },

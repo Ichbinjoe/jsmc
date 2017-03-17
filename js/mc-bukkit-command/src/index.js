@@ -1,4 +1,3 @@
-var bacon = require("baconjs")
 var plugin = require("mc-bukkit-plugin")
 var c = require("mc-bukkit-consts")
 
