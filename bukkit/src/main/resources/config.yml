@@ -1,1 +1,13 @@
+#
+# JSMC Configuration v1.0.0
+#
+
+# Root loading location. Defaults to the current directory.
+#
+# node_modules should be present within this directory
+root: ./
+
+# Default module loader. This loader is used to seed the loading of other modules, specially loaded by jsmc.
+#
+# This module should be present within the root/node_modules directory.
 loader: mc-bukkit-default-loader

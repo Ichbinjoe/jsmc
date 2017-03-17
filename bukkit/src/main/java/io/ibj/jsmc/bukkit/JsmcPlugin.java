@@ -29,20 +29,11 @@ public class JsmcPlugin extends JavaPlugin {
 
     private static final String ERROR_HEADER = "=============================================\n";
 
-    private final FileSystemResolver fileSystemResolver;
-    private final SystemDependencyResolver<Path> systemDependencyResolver;
-    private final SystemDependencyResolver<Path> addOnDependencyResolver;
-    private ModuleResolver moduleResolver = null;
-    public final BasicDependencyManager<Path> dependencyManager;
-
-    public JsmcPlugin() {
-        Path rootPath = Bukkit.getWorldContainer().toPath();
-        fileSystemResolver = new FileSystemResolver(() -> moduleResolver, rootPath);
-        systemDependencyResolver = new SystemDependencyResolver<>(null);
-        addOnDependencyResolver = new SystemDependencyResolver<>(systemDependencyResolver);
-        moduleResolver = new ModuleResolver(rootPath, fileSystemResolver, addOnDependencyResolver);
-        dependencyManager = new BasicDependencyManager<>(moduleResolver, rootPath);
-    }
+    private FileSystemResolver fileSystemResolver;
+    private SystemDependencyResolver<Path> systemDependencyResolver;
+    private SystemDependencyResolver<Path> addOnDependencyResolver;
+    private ModuleResolver moduleResolver;
+    public BasicDependencyManager<Path> dependencyManager;
 
     @Override
     public void onDisable() {
@@ -90,6 +81,14 @@ public class JsmcPlugin extends JavaPlugin {
             loaderModuleName = "mc-bukkit-default-loader";
         }
 
+        Path rootPath = new File(c.getString("root", "./")).toPath();
+
+        fileSystemResolver = new FileSystemResolver(() -> moduleResolver, rootPath);
+        systemDependencyResolver = new SystemDependencyResolver<>(null);
+        addOnDependencyResolver = new SystemDependencyResolver<>(systemDependencyResolver);
+        moduleResolver = new ModuleResolver(rootPath, fileSystemResolver, addOnDependencyResolver);
+        dependencyManager = new BasicDependencyManager<>(moduleResolver, rootPath);
+
         try {
             dependencyManager.load(loaderModuleName); // this should then sequentially load everything else
         } catch (Exception e) {
@@ -101,8 +100,6 @@ public class JsmcPlugin extends JavaPlugin {
                     ERROR_HEADER;
             getLogger().log(Level.SEVERE, msg, e);
             setEnabled(false);
-            return;
         }
     }
-
 }
