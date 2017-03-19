@@ -18,6 +18,9 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Level;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
+import java.util.zip.ZipInputStream;
 
 // todo - configurable default folder. May mean forcing instantiation of resolvers at 'onEnable'
 
@@ -32,8 +35,12 @@ public class JsmcPlugin extends JavaPlugin {
     private FileSystemResolver fileSystemResolver;
     private SystemDependencyResolver<Path> systemDependencyResolver;
     private SystemDependencyResolver<Path> addOnDependencyResolver;
-    private ModuleResolver moduleResolver;
+    public ModuleResolver moduleResolver;
     public BasicDependencyManager<Path> dependencyManager;
+
+    public JsmcPlugin() {
+        systemDependencyResolver = new SystemDependencyResolver<>(null);
+    }
 
     @Override
     public void onDisable() {
@@ -82,9 +89,51 @@ public class JsmcPlugin extends JavaPlugin {
         }
 
         Path rootPath = new File(c.getString("root", "./")).toPath();
+        Path node_modules = rootPath.resolve("node_modules");
+
+        if (!Files.exists(node_modules)) {
+            try {
+                seedInstall(node_modules);
+            } catch (IOException e) {
+                String msg = "" +
+                        ERROR_HEADER +
+                        "A severe exception has occurred! jsmc will not be able to load!\n" +
+                        "jsmc could not find the node_modules directory, and failed to create it!\n" +
+                        "jsmc will now disable!\n" +
+                        ERROR_HEADER;
+                getLogger().log(Level.SEVERE, msg, e);
+                setEnabled(false);
+                return;
+            }
+        } else {
+            try {
+                if (!Files.isDirectory(node_modules) || !(Files.isSymbolicLink(node_modules) && Files.isDirectory(node_modules.toRealPath()))) {
+                    String msg = "" +
+                            ERROR_HEADER +
+                            "A severe exception has occurred! jsmc will not be able to load!\n" +
+                            "node_modules is not a directory or a symlink to a directory!\n" +
+                            "jsmc will now disable!\n" +
+                            ERROR_HEADER;
+                    getLogger().log(Level.SEVERE, msg);
+                    setEnabled(false);
+                    return;
+                }
+            } catch (IOException e) {
+                String msg = "" +
+                        ERROR_HEADER +
+                        "A severe exception has occurred! jsmc will not be able to load!\n" +
+                        "node_modules' symlink could not be resolved into a working path!\n" +
+                        "jsmc will now disable!\n" +
+                        ERROR_HEADER;
+                getLogger().log(Level.SEVERE, msg, e);
+                setEnabled(false);
+                e.printStackTrace();
+                return;
+            }
+        }
+
 
         fileSystemResolver = new FileSystemResolver(() -> moduleResolver, rootPath);
-        systemDependencyResolver = new SystemDependencyResolver<>(null);
         addOnDependencyResolver = new SystemDependencyResolver<>(systemDependencyResolver);
         moduleResolver = new ModuleResolver(rootPath, fileSystemResolver, addOnDependencyResolver);
         dependencyManager = new BasicDependencyManager<>(moduleResolver, rootPath);
@@ -100,6 +149,23 @@ public class JsmcPlugin extends JavaPlugin {
                     ERROR_HEADER;
             getLogger().log(Level.SEVERE, msg, e);
             setEnabled(false);
+        }
+    }
+
+    public void seedInstall(Path node_modules) throws IOException {
+        getLogger().info("Bootstrapping node_modules folder onto server root");
+
+        Files.createDirectory(node_modules);
+
+        try(ZipInputStream zis = new ZipInputStream(getResource("package.zip"))) {
+            ZipEntry e;
+            while((e = zis.getNextEntry()) != null) {
+                Path child = node_modules.resolve(e.getName());
+                if (e.isDirectory())
+                    Files.createDirectory(child);
+                else
+                    Files.copy(zis, child);
+            }
         }
     }
 }

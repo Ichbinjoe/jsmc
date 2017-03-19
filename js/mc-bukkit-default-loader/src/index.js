@@ -59,7 +59,7 @@ function idMap(entries) {
 }
 
 function loadableModuleNames() {
-  return manager.getLoadableModules()
+  return plugin.jsmc.moduleResolver.getLoadableModules()
 }
 
 function loadedModuleNames() {
