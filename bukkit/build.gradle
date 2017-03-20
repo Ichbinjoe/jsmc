@@ -7,6 +7,14 @@ dependencies {
     compile group: "org.spigotmc", name: "spigot-api", version: "1.11.2-R0.1-SNAPSHOT"
 }
 
+processResources {
+    filesMatching("**.yml") {
+        expand(
+                'build_version': this.parent.version
+        )
+    }
+}
+
 processResources.dependsOn ":js:zip"
 def resourceZipDir = new File(project(":js").buildDir, "zip")
 processResources.inputs.dir(resourceZipDir)
@@ -31,4 +39,3 @@ shadowJar {
     }
     archiveName = "jsmc.${extension}"
 }
-

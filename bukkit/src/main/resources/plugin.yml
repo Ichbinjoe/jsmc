@@ -1,3 +1,3 @@
 name: jsmc
-version: DANK MEMES
+version: ${build_version}
 main: io.ibj.jsmc.bukkit.JsmcPlugin

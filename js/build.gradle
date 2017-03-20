@@ -54,6 +54,17 @@ task clean() {
     }
 }
 
+task prepare() {
+    doLast {
+        buildable.forEach { m ->
+            exec {
+                workingDir file(m)
+                commandLine 'npm', 'install', '--only=dev'
+            }
+        }
+    }
+}
+
 task publish(dependsOn: build) {
     doLast {
         allModules.forEach { m ->

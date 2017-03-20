@@ -203,9 +203,9 @@ jsmc.commandHandler = (sender, label, args) => {
     return
   }
     
-  const cmd = cmdMap.get(k)
+  const cmd = cmdMap.get(args[0])
   if (cmd == null) {
-    sender.sendMessage(c.ChatColor.RED + "Subcommand '" + args[0] + "' not found!")
+    sender.sendMessage(c.ChatColorRED + "Subcommand '" + args[0] + "' not found!")
     sendHelp(sender)
     return
   }

@@ -5,7 +5,6 @@ import io.ibj.jsmc.core.BasicDependencyManager;
 import io.ibj.jsmc.core.resolvers.FileSystemResolver;
 import io.ibj.jsmc.core.resolvers.ModuleResolver;
 import io.ibj.jsmc.core.resolvers.SystemDependencyResolver;
-import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -13,13 +12,8 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.logging.Level;
 import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
 
 // todo - configurable default folder. May mean forcing instantiation of resolvers at 'onEnable'
@@ -44,6 +38,8 @@ public class JsmcPlugin extends JavaPlugin {
 
     @Override
     public void onDisable() {
+        if (dependencyManager == null)
+            return;
         try {
             for (DependencyManager.Entry e : dependencyManager.getLoadedModules())
                 dependencyManager.unload(e);
@@ -107,7 +103,7 @@ public class JsmcPlugin extends JavaPlugin {
             }
         } else {
             try {
-                if (!Files.isDirectory(node_modules) || !(Files.isSymbolicLink(node_modules) && Files.isDirectory(node_modules.toRealPath()))) {
+                if (!Files.isDirectory(node_modules) && !(Files.isSymbolicLink(node_modules) && Files.isDirectory(node_modules.toRealPath()))) {
                     String msg = "" +
                             ERROR_HEADER +
                             "A severe exception has occurred! jsmc will not be able to load!\n" +
