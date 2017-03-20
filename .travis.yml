@@ -22,3 +22,6 @@ addons:
   apt:
     packages:
       - nodejs
+  artifacts:
+    paths:
+      - $HOME/bukkit/build/libs/*.jar
