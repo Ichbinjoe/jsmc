@@ -2,7 +2,18 @@ def buildable = ['mc-bukkit-command', 'mc-bukkit-default-loader', 'mc-bukkit-eve
 def allModules = ['mc-bukkit-consts', 'mc-bukkit-plugin']
 allModules.addAll(buildable)
 
-task build {
+task prepare() {
+    doLast {
+        buildable.forEach { m ->
+            exec {
+                workingDir file(m)
+                commandLine 'npm', 'install', '--only=dev'
+            }
+        }
+    }
+}
+
+task build(dependsOn: prepare) {
     doLast {
         buildable.forEach { m ->
             exec {
@@ -51,17 +62,6 @@ task clean() {
         }
 
         delete "$buildDir/"
-    }
-}
-
-task prepare() {
-    doLast {
-        buildable.forEach { m ->
-            exec {
-                workingDir file(m)
-                commandLine 'npm', 'install', '--only=dev'
-            }
-        }
     }
 }
 
