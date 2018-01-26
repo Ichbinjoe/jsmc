@@ -1,5 +1,5 @@
 pipeline:
   build:
-    image: gradle:jdk9
+    image: gradle:jdk8
     commands:
     - gradle
