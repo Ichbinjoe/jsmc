@@ -1,0 +1,5 @@
+pipeline:
+  build:
+    image: gradle:jdk9
+    commands:
+    - gradle
