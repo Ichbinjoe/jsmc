@@ -16,7 +16,7 @@ configure(subprojects.findAll({p -> p.name != "js"}), {
     dependencies {
         testCompile group: 'junit', name: 'junit', version: '4.12'
         testCompile group: 'org.mockito', name: 'mockito-core', version: '2.+'
-        testCompile group: 'org.projectlombok', name: 'lombok', version: '1.16.12'
+        testCompileOnly group: 'org.projectlombok', name: 'lombok', version: '1.16.20'
     }
 
     tasks.withType(JavaCompile) {
