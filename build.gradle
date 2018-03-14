@@ -32,5 +32,5 @@ configure(subprojects.findAll({p -> p.name != "js"}), {
 })
 
 task wrapper(type: Wrapper) {
-    gradleVersion = '3.3'
+    gradleVersion = '4.4'
 }
