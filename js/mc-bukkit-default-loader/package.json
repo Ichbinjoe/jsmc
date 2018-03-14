@@ -12,7 +12,7 @@
   "dependencies": {
     "mc-bukkit-command": "^0.0.1",
     "mc-bukkit-consts": "^0.0.1",
-    "mc-bukkit-plugin" : "^0.0.1"
+    "mc-bukkit-plugin": "^0.0.1"
   },
   "devDependencies": {
     "babel-cli": "^6.0.0",

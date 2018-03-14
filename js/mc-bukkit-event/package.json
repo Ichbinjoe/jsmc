@@ -12,7 +12,7 @@
   "dependencies": {
     "baconjs": "^0.7.87",
     "mc-bukkit-consts": "^0.0.1",
-    "mc-bukkit-plugin" : "^0.0.1"
+    "mc-bukkit-plugin": "^0.0.1"
   },
   "devDependencies": {
     "babel-cli": "^6.0.0",

@@ -1,8 +1,7 @@
 group 'io.ibj'
 version '1.0-SNAPSHOT'
 
-defaultTasks 'clean', 'build', 'shadow', 'test'
-configure(subprojects.findAll({p -> p.name != "js"}), {
+subprojects {
     apply plugin: "java"
     repositories {
         mavenCentral()
@@ -29,8 +28,10 @@ configure(subprojects.findAll({p -> p.name != "js"}), {
             events "PASSED", "FAILED", "SKIPPED"
         }
     }
-})
+}
 
 task wrapper(type: Wrapper) {
     gradleVersion = '3.3'
 }
+
+build.dependsOn shadow

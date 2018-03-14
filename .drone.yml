@@ -1,5 +1,4 @@
 pipeline:
   build:
-    image: gradle:jdk8
-    commands:
-    - gradle
+    image: parallelblock/jsmcbuild
+    commands: ./gradlew build --no-daemon
