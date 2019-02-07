@@ -51,8 +51,9 @@ public interface DependencyManager {
      * @throws ModuleExecutionException     if module throws an exception
      * @throws ModuleNotFoundException      if module doesn't actually exist
      * @throws IOException                  if an io related exception occurs
+     * @return Reference to module which was loaded
      */
-    void load(String moduleIdentifier) throws ModuleAlreadyLoadedException, ModuleCompilationException, ModuleExecutionException, ModuleNotFoundException, IOException;
+    Entry load(String moduleIdentifier) throws ModuleAlreadyLoadedException, ModuleCompilationException, ModuleExecutionException, ModuleNotFoundException, IOException;
 
     /**
      * Unloads a module from the dependency manager.

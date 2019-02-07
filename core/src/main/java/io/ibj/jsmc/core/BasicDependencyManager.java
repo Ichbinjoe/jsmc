@@ -85,7 +85,7 @@ public class BasicDependencyManager<Scope> implements DependencyManager, Depende
      * {@inheritDoc}
      */
     @Override
-    public void load(String identifier) throws ModuleAlreadyLoadedException, ModuleCompilationException, ModuleExecutionException, ModuleNotFoundException, IOException {
+    public Entry load(String identifier) throws ModuleAlreadyLoadedException, ModuleCompilationException, ModuleExecutionException, ModuleNotFoundException, IOException {
         identifier = identifier.toLowerCase();
         Optional<Dependency> d = dependencyResolver.resolve(resolutionScope, identifier);
         if (d.isPresent()) {
@@ -97,6 +97,7 @@ public class BasicDependencyManager<Scope> implements DependencyManager, Depende
             DependencyLifecycle lifecycle = dependency.depend(this);
             DEntry newInfo = new DEntry(dependency, lifecycle, identifier);
             loadedModules.put(dependency, newInfo);
+            return newInfo;
         } else {
             throw new ModuleNotFoundException(identifier);
         }
