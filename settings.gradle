@@ -3,3 +3,7 @@ include 'api'
 include 'core'
 include 'bukkit'
 include 'js'
+include 'bungeecord'
+include 'runtime'
+include 'sponge'
+

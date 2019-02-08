@@ -1,5 +1,4 @@
 name: jsmc
+main: io.ibj.jsmc.bungee.JsmcPlugin
 version: ${build_version}
-main: io.ibj.jsmc.bukkit.JsmcPlugin
 author: Ichbinjoe
-api-version: 1.13

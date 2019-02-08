@@ -1,0 +1,8 @@
+plugins {
+    id 'org.spnogepowered.plugin' version '0.9.0'
+}
+
+dependencies {
+    compile project(":runtime")
+    compile group: "org.spongepowered", name: "spongeapi", version: "7.1.0"
+}
